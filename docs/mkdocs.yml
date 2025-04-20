@@ -1,0 +1,16 @@
+site_name: acme-portal-sdk
+theme:
+  name: material # readthedocs
+nav:
+  - Introduction: index.md
+  - Installation: install.md
+  - Architecture: architecture.md
+  - Features: features.md
+  - User Guides: guides.md
+  - API Reference: api.md
+  - Release Notes: release_notes.md
+extra_css:
+  - stylesheets/extra.css
+
+plugins:
+- mkdocstrings

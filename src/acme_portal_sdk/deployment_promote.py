@@ -1,0 +1,44 @@
+from abc import ABC, abstractmethod
+from typing import List
+
+
+class DeploymentPromote(ABC):
+    """Responsible for promoting flows between different environments (e.g., dev to prod), managing the transition of deployments"""
+
+    @abstractmethod
+    def promote(
+        self,
+        project_name: str,
+        branch_name: str,
+        source_env: str,
+        target_env: str,
+        flows_to_deploy: List[str],
+    ):
+        """Promote flows from one environment to another.
+
+        Args:
+            project_name: Name of the project
+            branch_name: Name of the branch
+            source_env: Source environment
+            target_env: Target environment
+            flows_to_deploy: List of flow names to promote
+        """
+        pass
+
+
+class PromoteWorkflow(ABC):
+    """Encapsulates the workflow for promoting flows between environments."""
+
+    @abstractmethod
+    def run(
+        self, flows_to_deploy: List[str], source_env: str, target_env: str, ref: str
+    ):
+        """Run the promotion workflow for the specified flows.
+
+        Args:
+            flows_to_deploy: List of flow names to promote
+            source_env: Source environment
+            target_env: Target environment
+            ref: The git ref (branch/tag) for the workflow
+        """
+        pass
