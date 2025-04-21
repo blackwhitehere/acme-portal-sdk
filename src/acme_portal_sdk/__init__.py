@@ -2,6 +2,7 @@ import logging
 
 from dotenv import load_dotenv
 
+# isort: off
 from ._main import main  # noqa: F401
 from .deployment_finder import DeploymentDetails  # noqa: F401
 from .deployment_finder import DeploymentFinder  # noqa: F401
