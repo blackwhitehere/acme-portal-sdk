@@ -28,3 +28,6 @@ class DeploymentFinder(ABC):
     def get_deployments(self) -> List[DeploymentDetails]:
         """Method to find deployments, to be implemented by subclasses."""
         pass
+
+    def __call__(self) -> List[DeploymentDetails]:
+        return self.get_deployments()

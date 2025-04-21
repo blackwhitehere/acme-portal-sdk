@@ -38,3 +38,6 @@ class FlowFinder(ABC):
     def find_flows(self) -> List[FlowDetails]:
         """Method to find flows, to be implemented by subclasses."""
         pass
+
+    def __call__(self) -> List[FlowDetails]:
+        return self.find_flows()
