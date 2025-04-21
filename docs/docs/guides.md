@@ -2,7 +2,7 @@
 
 ## Configuring SDK for your project
 
-`acme-portal` `VSCode` extension will look into `.acme-portal-sdk` dot directory in root of your open workspace and look for python files:
+`acme-portal` `VSCode` extension will look into `.acme_portal_sdk` dot directory in root of your open workspace and look for python files:
 
 * `flow_finder.py`
 * `flow_deploy.py`

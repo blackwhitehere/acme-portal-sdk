@@ -1,15 +1,19 @@
 [build-system]
-requires = [ "setuptools>=46.4.0", "wheel>=0.36.2"]
+requires = ["setuptools>=46.4.0", "wheel>=0.36.2"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "acme_portal_sdk"
-version = "0.0.1"
+version = "0.0.2"
 description = "SDK to customize behaviour of acme-portal VSCode extension"
 readme = "README.md"
-classifiers = [ "Programming Language :: Python :: 3.12", ]
-requires-python = ">=3.12"
-dependencies = [ "python-dotenv",]
+classifiers = [
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+requires-python = ">=3.10"
+dependencies = ["python-dotenv"]
 
 [[project.authors]]
 email = "guner.stan@gmail.com"
@@ -36,7 +40,7 @@ dev = [
 prefect = ["prefect"]
 
 [tool.setuptools]
-package-dir = {"" = "src"}
+package-dir = { "" = "src" }
 packages = ["acme_portal_sdk"]
 # https://github.com/astral-sh/uv/issues/9513#issuecomment-2519527822
 license-files = []
