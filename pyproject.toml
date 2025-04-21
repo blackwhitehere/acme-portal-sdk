@@ -41,7 +41,7 @@ prefect = ["prefect"]
 
 [tool.setuptools]
 package-dir = { "" = "src" }
-packages = ["acme_portal_sdk"]
+packages = { find = { where = ["src"] } }
 # https://github.com/astral-sh/uv/issues/9513#issuecomment-2519527822
 license-files = []
 # [tool.setuptools.package-data]
