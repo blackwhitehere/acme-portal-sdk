@@ -14,7 +14,7 @@ class FlowDetails:
     original_name: str  # Name as defined in the code
     description: str  # Description of the flow
     obj_type: str  # Type of object defining the flow (e.g., function, method)
-    ob_name: (
+    obj_name: (
         str  # Name of the object defining the flow (e.g., function name, method name)
     )
     obj_parent_type: (
