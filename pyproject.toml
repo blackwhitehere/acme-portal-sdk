@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "acme_portal_sdk"
-version = "0.0.5"
+version = "0.0.6"
 description = "SDK to customize behaviour of acme-portal VSCode extension"
 readme = "README.md"
 classifiers = [

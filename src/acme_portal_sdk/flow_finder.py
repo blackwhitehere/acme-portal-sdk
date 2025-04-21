@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
-from typing import List
+from dataclasses import asdict, dataclass
+from typing import Any, Dict, List
 
 
 @dataclass
@@ -29,6 +29,16 @@ class FlowDetails:
     grouping: List[
         str
     ]  # Desired grouping of the flow in the context of the project (for navigation)
+
+    @staticmethod
+    def to_dict(data) -> Dict[str, Any]:
+        """Convert the FlowDetails to a dictionary suitable for JSON serialization."""
+        return asdict(data)
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "FlowDetails":
+        """Create a FlowDetails instance from a dictionary representation."""
+        return cls(**data)
 
 
 class FlowFinder(ABC):

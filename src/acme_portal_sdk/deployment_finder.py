@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
-from typing import List
+from dataclasses import asdict, dataclass
+from typing import Any, Dict, List
 
 
 @dataclass
@@ -19,6 +19,16 @@ class DeploymentDetails:
     created_at: str  # Timestamp of when the deployment was created
     updated_at: str  # Timestamp of when the deployment was last updated
     flow_id: str  # Unique identifier for the flow in the deployment system
+
+    @staticmethod
+    def to_dict(data) -> Dict[str, Any]:
+        """Convert the DeploymentDetails to a dictionary suitable for JSON serialization."""
+        return asdict(data)
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "DeploymentDetails":
+        """Create a DeploymentDetails instance from a dictionary representation."""
+        return cls(**data)
 
 
 class DeploymentFinder(ABC):
