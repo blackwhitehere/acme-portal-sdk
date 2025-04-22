@@ -20,10 +20,9 @@ class DeploymentDetails:
     updated_at: str  # Timestamp of when the deployment was last updated
     flow_id: str  # Unique identifier for the flow in the deployment system
 
-    @staticmethod
-    def to_dict(data) -> Dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Convert the DeploymentDetails to a dictionary suitable for JSON serialization."""
-        return asdict(data)
+        return asdict(self)
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "DeploymentDetails":
@@ -39,5 +38,5 @@ class DeploymentFinder(ABC):
         """Method to find deployments, to be implemented by subclasses."""
         pass
 
-    def __call__(self) -> List[DeploymentDetails]:
-        return self.get_deployments()
+    def __call__(self) -> List[Dict[str, Any]]:
+        return [x.to_dict() for x in self.get_deployments()]

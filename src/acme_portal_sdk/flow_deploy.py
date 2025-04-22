@@ -85,3 +85,16 @@ class DeployWorkflow(ABC):
             Optional[str]: URL of the deployment if successful, None otherwise
         """
         pass
+
+    def __call__(self, *args, **kwargs) -> Optional[str]:
+        """
+        Call the run method with the provided arguments.
+
+        Args:
+            **args: Positional arguments
+            **kwargs: Keyword arguments
+
+        Returns:
+            Optional[str]: URL of the deployment if successful, None otherwise
+        """
+        return self.run(*args, **kwargs)

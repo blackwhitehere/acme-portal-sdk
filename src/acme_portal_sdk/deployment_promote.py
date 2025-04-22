@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, Optional
 
 
 class DeploymentPromote(ABC):
@@ -32,7 +32,7 @@ class PromoteWorkflow(ABC):
     @abstractmethod
     def run(
         self, flows_to_deploy: List[str], source_env: str, target_env: str, ref: str
-    ):
+    ) -> Optional[str]:
         """Run the promotion workflow for the specified flows.
 
         Args:
@@ -40,5 +40,18 @@ class PromoteWorkflow(ABC):
             source_env: Source environment
             target_env: Target environment
             ref: The git ref (branch/tag) for the workflow
+        Returns:
+            Optional[str]: URL of the promotion if successful, None otherwise
         """
         pass
+
+    def __call__(self, *args, **kwargs) -> Optional[str]:
+        """Call the run method with the provided arguments.
+
+        Args:
+            **args: Positional arguments
+            **kwargs: Keyword arguments
+        Returns:
+            Optional[str]: URL of the promotion if successful, None otherwise
+        """
+        return self.run(*args, **kwargs)

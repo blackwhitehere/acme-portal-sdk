@@ -30,10 +30,9 @@ class FlowDetails:
         str
     ]  # Desired grouping of the flow in the context of the project (for navigation)
 
-    @staticmethod
-    def to_dict(data) -> Dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Convert the FlowDetails to a dictionary suitable for JSON serialization."""
-        return asdict(data)
+        return asdict(self)
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "FlowDetails":
@@ -49,5 +48,5 @@ class FlowFinder(ABC):
         """Method to find flows, to be implemented by subclasses."""
         pass
 
-    def __call__(self) -> List[FlowDetails]:
-        return self.find_flows()
+    def __call__(self) -> List[Dict[str, Any]]:
+        return [x.to_dict() for x in self.find_flows()]
