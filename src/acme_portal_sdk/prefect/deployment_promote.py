@@ -141,6 +141,7 @@ class PrefectDeploymentPromote(DeploymentPromote):
         source_env: str,
         target_env: str,
         flows_to_deploy: List[str],
+        target_env_vars: Optional[Dict[str, str]] = None,
     ) -> None:
         """
         Promote flows from one environment to another.
@@ -151,6 +152,7 @@ class PrefectDeploymentPromote(DeploymentPromote):
             source_env: Source environment
             target_env: Target environment
             flows_to_deploy: List of flow names to promote
+            target_env_vars: Optional environment variables to set for the target environment
         """
         # Standardize flow names
         std_flows_to_deploy = [
@@ -173,6 +175,7 @@ class PrefectDeploymentPromote(DeploymentPromote):
                 source_deployment_info=source_deployment_info,
                 target_env=target_env,
                 flow_name=flow_name,
+                env_vars=target_env_vars,
             )
 
             all_deploy_infos.extend(deploy_infos)

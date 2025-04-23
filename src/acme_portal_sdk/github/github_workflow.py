@@ -221,7 +221,7 @@ class GithubActionsDeployWorkflow(DeployWorkflow):
         flows_str = ",".join(flows_to_deploy)
 
         # Prepare workflow inputs
-        workflow_inputs = {"flows": flows_str}
+        workflow_inputs = {"flows-to-deploy": flows_str}
 
         # Trigger the workflow
         run_url = self.workflow_service.trigger_workflow(
