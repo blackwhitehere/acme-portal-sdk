@@ -116,12 +116,12 @@ class PrefectDeployInfoPrep(DeployInfoPrep):
 
     def prep_deploy_info(
         self,
-        project_name,
-        branch_name,
-        commit_hash,
-        image_uri,
-        package_version,
-        env,
+        project_name: str,
+        branch_name: str,
+        commit_hash: str,
+        image_uri: str,
+        package_version: str,
+        env: str,
         flows_to_deploy: List[str],
         env_vars: Optional[Dict[str, str]] = None,
     ) -> List[PrefectDeployInfo]:
