@@ -20,6 +20,7 @@ email = "guner.stan@gmail.com"
 
 [project.scripts]
 aps = "acme_portal_sdk._main:main"
+aps-prefect-deploy = "acme_portal_sdk.prefect_deploy:main"
 
 [project.urls]
 homepage = "https://example.com"
@@ -37,7 +38,7 @@ dev = [
     "ruff",                 # for linting
     "pre-commit",           # for pre-commit hooks
 ]
-prefect = ["prefect"]
+prefect = ["prefect", "acme_config"]
 
 [tool.setuptools]
 package-dir = { "" = "src" }
