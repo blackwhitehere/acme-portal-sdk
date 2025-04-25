@@ -2,6 +2,9 @@ name: Deploy Prefect flows from X to Y
 
 env:
   PACKAGE_NAME: acme_prefect
+  SOURCE_ENV: ${{ inputs.source-env || 'dev' }}
+  TARGET_ENV: ${{ inputs.target-env || 'tst' }}
+  FLOWS_TO_DEPLOY: ${{ inputs.flows-to-deploy || 'all' }}
 
 on:
   workflow_dispatch:
@@ -65,7 +68,7 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
-          ENV_LABEL: ${{ inputs.target-env }}
+          ENV_LABEL: ${{ env.TARGET_ENV }}
         run: |
           ENV_VERSION_NUMBER=$(uv run ac get-version -app-name $PACKAGE_NAME -env $ENV_LABEL)
           echo "ENV_VERSION_NUMBER=$ENV_VERSION_NUMBER" >> "$GITHUB_OUTPUT"
@@ -77,7 +80,7 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
-          ENV_LABEL: ${{ inputs.target-env }}
+          ENV_LABEL: ${{ env.TARGET_ENV }}
           ENV_VERSION_NUMBER: ${{ steps.get-default-version-number.outputs.ENV_VERSION_NUMBER }}
         run: |
           uv run ac fetch -app-name $PACKAGE_NAME -env $ENV_LABEL -ver-number $ENV_VERSION_NUMBER
@@ -89,12 +92,16 @@ jobs:
           ENV_VERSION_NUMBER: ${{ steps.get-default-version-number.outputs.ENV_VERSION_NUMBER }}
           BRANCH_NAME: ${{ env.BRANCH_NAME }}
           PACKAGE_NAME: ${{ env.PACKAGE_NAME }}
+          PREFECT_WORKSPACE: ${{ secrets.PREFECT_WORKSPACE }}
+          FLOWS_TO_DEPLOY: ${{ env.FLOWS_TO_DEPLOY }}
+          SOURCE_ENV: ${{ env.SOURCE_ENV }}
+          TARGET_ENV: ${{ env.TARGET_ENV }}
         run: |
-          uv run prefect cloud workspace set -w ${{ secrets.PREFECT_WORKSPACE }}
+          uv run prefect cloud workspace set -w $PREFECT_WORKSPACE
           uv run aps-prefect-deploy promote -app-name $PACKAGE_NAME \
-           -env ${{ inputs.target-env }} -ver-number $ENV_VERSION_NUMBER \
+           -env $TARGET_ENV -ver-number $ENV_VERSION_NUMBER \
            -branch-name $BRANCH_NAME -project-name $PACKAGE_NAME \
-           -source-env ${{ inputs.source-env }} \
-           --flows-to-deploy ${{ inputs.flows-to-deploy }} \
+           -source-env $SOURCE_ENV \
+           --flows-to-deploy $FLOWS_TO_DEPLOY \
            -static-flow-config-path .acme_portal_sdk/static_flow_deploy_config.yaml
                 

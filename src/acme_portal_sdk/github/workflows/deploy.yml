@@ -1,11 +1,10 @@
-# TODO: make acme-config optional
-
 name: Deploy Prefect flows to DEV
 # Check https://github.com/PrefectHQ/cicd-example-workspaces
 # https://docs.prefect.io/v3/deploy/infrastructure-concepts/deploy-ci-cd
 # https://docs.prefect.io/v3/deploy/infrastructure-concepts/deploy-via-python
 
 env:
+  FLOWS_TO_DEPLOY: ${{ inputs.flows-to-deploy || 'all' }}
   PACKAGE_NAME: ${{ inputs.package-name || 'acme_prefect' }}
   IMAGE_NAME: ${{ inputs.image-name || 'acme-prefect' }}
   ENV_LABEL: ${{ inputs.env-label || 'dev' }}
@@ -177,10 +176,12 @@ jobs:
           BRANCH_NAME: ${{ env.BRANCH_NAME }}
           COMMIT_HASH: ${{ steps.get-commit-hash.outputs.COMMIT_HASH }}
           PACKAGE_VERSION: ${{ steps.get-package-version-number.outputs.PACKAGE_VERSION }}
+          FLOWS_TO_DEPLOY: ${{ env.FLOWS_TO_DEPLOY }}
+          PREFECT_WORKSPACE: ${{ secrets.PREFECT_WORKSPACE }}
         run: |
-          uv run prefect cloud workspace set -w ${{ secrets.PREFECT_WORKSPACE }}
+          uv run prefect cloud workspace set -w $PREFECT_WORKSPACE
           uv run aps-prefect-deploy deploy -app-name $PACKAGE_NAME \
            -env $ENV_LABEL -ver-number $ENV_VERSION_NUMBER -image-uri $IMAGE_URI \
            -branch-name $BRANCH_NAME -commit-hash $COMMIT_HASH -project-name $PACKAGE_NAME \
-           -package-version $PACKAGE_VERSION --flows-to-deploy ${{ inputs.flows-to-deploy }} \
+           -package-version $PACKAGE_VERSION --flows-to-deploy $FLOWS_TO_DEPLOY \
            -static-flow-config-path .acme_portal_sdk/static_flow_deploy_config.yaml
