@@ -25,7 +25,7 @@ def import_flow_finder():
         The flow_finder instance from .acme_portal_sdk/flow_finder.py
     """
     # Find the project root directory (where .acme_portal_sdk should exist)
-    project_root = Path(__file__).parent.parent.parent.absolute()
+    project_root = Path.cwd()  # todo: should this be passed from command line?
     acme_portal_sdk_path = project_root / ".acme_portal_sdk"
 
     # Make sure the path exists
