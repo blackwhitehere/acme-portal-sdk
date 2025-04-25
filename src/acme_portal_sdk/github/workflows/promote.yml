@@ -91,7 +91,7 @@ jobs:
           PACKAGE_NAME: ${{ env.PACKAGE_NAME }}
         run: |
           uv run prefect cloud workspace set -w ${{ secrets.PREFECT_WORKSPACE }}
-          uv run python src/$PACKAGE_NAME/prefect_deploy.py promote -app-name $PACKAGE_NAME \
+          uv run aps-prefect-deploy promote -app-name $PACKAGE_NAME \
            -env ${{ inputs.target-env }} -ver-number $ENV_VERSION_NUMBER \
            -branch-name $BRANCH_NAME -project-name $PACKAGE_NAME \
            -source-env ${{ inputs.source-env }} \
