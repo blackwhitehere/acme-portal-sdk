@@ -95,5 +95,6 @@ jobs:
            -env ${{ inputs.target-env }} -ver-number $ENV_VERSION_NUMBER \
            -branch-name $BRANCH_NAME -project-name $PACKAGE_NAME \
            -source-env ${{ inputs.source-env }} \
-           --flows-to-deploy ${{ inputs.flows-to-deploy }}
+           --flows-to-deploy ${{ inputs.flows-to-deploy }} \
+           -static-flow-config-path .acme_portal_sdk/static_flow_deploy_config.yaml
                 

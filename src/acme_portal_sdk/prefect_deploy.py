@@ -60,19 +60,26 @@ def parse_args():
     deploy_parser.add_argument(
         "-project-name",
         type=lambda x: str(x).replace("_", "-"),
+        required=True,
         help="Name of the project",
     )
     deploy_parser.add_argument(
         "-branch-name",
         type=lambda x: str(x).replace("_", "-"),
+        required=True,
         help="Name of the branch",
     )
-    deploy_parser.add_argument("-commit-hash", type=str, help="Git commit hash")
-    deploy_parser.add_argument("-image-uri", type=str, help="Image URI")
-    deploy_parser.add_argument("-package-version", type=str, help="Package version")
+    deploy_parser.add_argument(
+        "-commit-hash", type=str, required=True, help="Git commit hash"
+    )
+    deploy_parser.add_argument("-image-uri", type=str, required=True, help="Image URI")
+    deploy_parser.add_argument(
+        "-package-version", type=str, required=True, help="Package version"
+    )
     deploy_parser.add_argument(
         "-static-flow-config-path",
         type=str,
+        required=True,
         help="Path to static flow deployment configuration file",
     )
     deploy_parser.add_argument(
@@ -85,20 +92,25 @@ def parse_args():
     # Promote parser for promoting deployment from one environment to another
     promote_parser = subparsers.add_parser("promote")
     add_main_arguments(promote_parser)
-    promote_parser.add_argument("-source-env", type=str, help="Source environment")
+    promote_parser.add_argument(
+        "-source-env", type=str, required=True, help="Source environment"
+    )
     promote_parser.add_argument(
         "-project-name",
         type=lambda x: str(x).replace("_", "-"),
+        required=True,
         help="Name of the project",
     )
     promote_parser.add_argument(
         "-branch-name",
         type=lambda x: str(x).replace("_", "-"),
+        required=True,
         help="Name of the branch",
     )
     promote_parser.add_argument(
         "-static-flow-config-path",
         type=str,
+        required=True,
         help="Path to static flow deployment configuration file",
     )
     promote_parser.add_argument(
