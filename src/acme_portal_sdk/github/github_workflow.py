@@ -85,6 +85,24 @@ class GitHubWorkflowService:
     def __init__(self, command_executor: CommandExecutor, git_service: GitService):
         self.command_executor = command_executor
         self.git_service = git_service
+        self._verify_gh_cli_installed()
+
+    def _verify_gh_cli_installed(self) -> None:
+        """
+        Verify that GitHub CLI (gh) is installed and available.
+
+        Raises:
+            RuntimeError: If GitHub CLI is not installed or not accessible
+        """
+        try:
+            self.command_executor.execute("gh --version")
+        except subprocess.CalledProcessError:
+            raise RuntimeError(
+                "GitHub CLI (gh) is not installed or not in PATH. "
+                "Please install it from https://cli.github.com/ to use this service."
+            )
+        except Exception as e:
+            raise RuntimeError(f"Error verifying GitHub CLI installation: {e}")
 
     def trigger_workflow(
         self,
