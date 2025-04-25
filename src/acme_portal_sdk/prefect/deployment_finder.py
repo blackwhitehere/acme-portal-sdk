@@ -1,3 +1,4 @@
+import os
 import sys
 import traceback
 from pprint import pp
@@ -28,6 +29,21 @@ class PrefectDeploymentFinder(DeploymentFinder):
         except Exception as e:
             print(f"Error authenticating with Prefect: {str(e)}")
             traceback.print_exc(file=sys.stderr)
+
+    def _get_deployment_url(self, deployment_id: str) -> str:
+        """Construct the URL for a given deployment ID."""
+        prefect_api_url = os.environ.get("PREFECT_API_URL")
+        if prefect_api_url is None:
+            raise ValueError(
+                "PREFECT_API_URL environment variable is not set. Please set it to your Prefect API URL."
+            )
+        prefect_app_url = prefect_api_url.replace(
+            "https://api.prefect.cloud/api", "https://app.prefect.cloud"
+        )
+        prefect_app_url = prefect_app_url.replace("accounts", "account").replace(
+            "workspaces", "workspace"
+        )
+        return f"{prefect_app_url}/deployments/deployment/{deployment_id}"
 
     def get_deployments(self) -> List[DeploymentDetails]:
         """Connect to Prefect and get deployment information."""
@@ -78,6 +94,7 @@ class PrefectDeploymentFinder(DeploymentFinder):
                     created_at=str(deployment.created),
                     updated_at=str(deployment.updated),
                     flow_id=str(deployment.flow_id),
+                    url=self._get_deployment_url(str(deployment.id)),
                 )
 
                 result.append(deploy_info)

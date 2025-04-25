@@ -19,6 +19,7 @@ class DeploymentDetails:
     created_at: str  # Timestamp of when the deployment was created
     updated_at: str  # Timestamp of when the deployment was last updated
     flow_id: str  # Unique identifier for the flow in the deployment system
+    url: str  # URL to the deployment in the deployment system
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert the DeploymentDetails to a dictionary suitable for JSON serialization."""
