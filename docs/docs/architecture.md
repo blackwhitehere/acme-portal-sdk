@@ -4,8 +4,8 @@ The main functions of `acme-portal` are:
 
 * Displaying a list of existing `Flows` in a project
 * Fetching and displaying deployment information for each `Flow`
-* Providing a VSCode command/task for kicking of initial deployment of a flow
-* Providing a VSCode command/task for promoting a deployment from source to target environment.
+* Providing a VSCode command & button for creating a deployment of a flow
+* Providing a VSCode command & button for promoting a deployment from a source to target environment.
 
 The data for first two are provided by calls to configured instances of:
 
