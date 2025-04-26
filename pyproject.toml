@@ -23,8 +23,8 @@ aps = "acme_portal_sdk._main:main"
 aps-prefect-deploy = "acme_portal_sdk.prefect_deploy:main"
 
 [project.urls]
-homepage = "https://example.com"
-repository = "https://example.com"
+homepage = "https://blackwhitehere.github.io/acme-portal-sdk/"
+repository = "https://github.com/blackwhitehere/acme-portal-sdk"
 
 [project.optional-dependencies]
 dev = [
