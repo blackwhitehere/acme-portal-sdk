@@ -1,11 +1,13 @@
 # acme-portal-sdk
 
+> **Important:** This SDK is currently in alpha and primarily for demonstration purposes. APIs may still change frequently.
+
 SDK to provide data and actions for `acme-portal` `VSCode` [extension](https://github.com/blackwhitehere/acme-portal).
 
 Rather than embedding a pre-defined logic in `acme-portal` extension, the SDK
 allows to define sources of data and behaviour for extension functionality. As such, the extension servers as UI layer to the implementation provided by SDK objects.
 
-# Problem
+## Problem
 
 A repeatable source of pain while working on software is that deployment processes are highly specific to a given project. While the application may be written in a well known language or framework, the deployment process is usually specialized to a given application, team and company making it difficult for new and existing team members to understand how to just "ship" their code.
 
@@ -16,7 +18,7 @@ In a way, they attempt to make the deployment process as frictionless and intuit
 
 `acme-portal-sdk` contains abstract interfaces expected by the `VSCode` `acme-portal` extension as well as a specific implementation of a deployment process for a python application based on the `prefect` orchestration library. Users of the SDK can easily extend the abstract interfaces to their projects. Some standard implementation schemes like one based on e.g. `airflow` can be made part of SDK in the future.
 
-# Concepts
+## Concepts
 
 To the end of clarifying deployment process, the SDK defines the following concepts:
 
@@ -42,7 +44,7 @@ For explanation of the features provided by default `prefect` based implementati
 See guide [Using default `prefect` based functionality](guides.md#using-default-prefect-based-functionality) for how to configure your project to work with `acme-portal` using the default `prefect` based implementation. You can view a sample project using it under [`acme-prefect`](https://github.com/blackwhitehere/acme-prefect).
 
 
-# Python environment
+## Python environment
 
 The project comes with a python development environment.
 To generate it, after checking out the repo run:
@@ -59,10 +61,10 @@ This will generate a new python virtual env under `.venv` directory. You can act
 
 If you are using VSCode, set to use this env via `Python: Select Interpreter` command.
 
-# Required setup post checkout
+## Required setup post checkout
 
 * Run `pre-commit install` to install the pre-commit hooks.
 
-# Project template
+## Project template
 
 This project has been setup with `acme-project-create`, a python code template library.
