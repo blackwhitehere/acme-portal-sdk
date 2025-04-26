@@ -18,14 +18,20 @@ from acme_portal_sdk.prefect.flow_finder import PrefectFlowFinder
 
 @dataclass
 class PrefectDeployInfo(DeployInfo):
-    """Dataclass that extends DeployInfo with Prefect-specific deployment configuration"""
+    """Dataclass that extends DeployInfo with Prefect-specific deployment configuration
 
-    triggers: Optional[Dict[str, Dict[Any, Any]]] = (
-        None  # Each key in the dictionary identifies the class and value provides the parameters for the trigger type
-    )
-    image_uri: Optional[str] = None  # Docker image URI for the flow deployment
-    version: Optional[str] = None  # Version identifier for the deployment
-    flow_function: Optional[Any] = None  # The actual flow function object
+    Attributes:
+        triggers: Each key in the dictionary identifies the trigger class and value
+            provides the parameters for the trigger type
+        image_uri: Docker image URI for the flow deployment
+        version: Version identifier for the deployment
+        flow_function: The actual flow function object
+    """
+
+    triggers: Optional[Dict[str, Dict[Any, Any]]] = None
+    image_uri: Optional[str] = None
+    version: Optional[str] = None
+    flow_function: Optional[Any] = None
 
     def get_trigger_instances(self) -> List[Any]:
         """

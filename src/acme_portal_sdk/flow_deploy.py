@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Dict
 
 
 @dataclass
@@ -8,31 +8,34 @@ class DeployInfo:
     """Holds configuration required to deploy a flow.
 
     Flow deployment contains configuration that defines how to run a unit of work (flow).
+
+    Attributes:
+        name: Name of the deployment
+        flow_name: Normalized name of the flow to deploy (from FlowDetails.name)
+        work_pool_name: Name of the work pool to use for the deployment, controls which group
+            of resources is used to execute the flow run
+        work_queue_name: Name of the work queue to use for the deployment, controls priority
+            of using resources in the pool
+        parameters: Parameters to pass to the flow when it runs
+        job_variables: Variables to pass to the job when it runs
+        cron: Cron schedule for the deployment
+        paused: Whether the deployment is in an inactive state
+        concurrency_limit: Controls possible number of concurrent flow runs
+        description: Description of the deployment, overriding the flow description
+        tags: Tags to associate with the deployment, for categorization and filtering
     """
 
-    name: str  # Name of the deployment
-    flow_name: str  # Normalized name of the flow to deploy (from FlowDetails.name)
-    work_pool_name: Optional[str] = (
-        None  # Name of the work pool to use for the deployment, controls which group of resources is used to execute the flow run
-    )
-    work_queue_name: Optional[str] = (
-        None  # Name of the work queue to use for the deployment, controls priority of using resources in the pool
-    )
-    parameters: Optional[dict[str, Any]] = (
-        None  # Parameters to pass to the flow when it runs
-    )
-    job_variables: Optional[dict] = None  # Variables to pass to the job when it runs
-    cron: Optional[str] = None  # Cron schedule for the deployment
-    paused: Optional[bool] = False  # Whether the deployment is in an inactive state
-    concurrency_limit: Optional[int] = (
-        1  # Controls possible number of concurrent flow runs
-    )
-    description: Optional[str] = (
-        None  # Description of the deployment, overriding the flow description
-    )
-    tags: Optional[list[str]] = (
-        None  # Tags to associate with the deployment, for categorization and filtering
-    )
+    name: str
+    flow_name: str
+    work_pool_name: Optional[str] = None
+    work_queue_name: Optional[str] = None
+    parameters: Optional[dict[str, Any]] = None
+    job_variables: Optional[dict] = None
+    cron: Optional[str] = None
+    paused: Optional[bool] = False
+    concurrency_limit: Optional[int] = 1
+    description: Optional[str] = None
+    tags: Optional[list[str]] = None
 
 
 class DeployInfoPrep(ABC):
@@ -42,7 +45,9 @@ class DeployInfoPrep(ABC):
     """
 
     @abstractmethod
-    def prep_deploy_info(self, *args, **kwargs) -> List[DeployInfo]:
+    def prep_deploy_info(
+        self, *args: List[Any], **kwargs: Dict[Any, Any]
+    ) -> List[DeployInfo]:
         """
         Prepare all deployment information needed to deploy.
 
@@ -51,7 +56,7 @@ class DeployInfoPrep(ABC):
             **kwargs: Keyword arguments
 
         Returns:
-            DeployInfo object with the prepared deployment information
+            List[DeployInfo]: A list of DeployInfo objects with the prepared deployment information
         """
         pass
 
@@ -86,7 +91,7 @@ class DeployWorkflow(ABC):
         """
         pass
 
-    def __call__(self, *args, **kwargs) -> Optional[str]:
+    def __call__(self, *args: List[Any], **kwargs: Dict[Any, Any]) -> Optional[str]:
         """
         Call the run method with the provided arguments.
 

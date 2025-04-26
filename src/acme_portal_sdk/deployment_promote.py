@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 
 
 class DeploymentPromote(ABC):
@@ -45,7 +45,7 @@ class PromoteWorkflow(ABC):
         """
         pass
 
-    def __call__(self, *args, **kwargs) -> Optional[str]:
+    def __call__(self, *args: List[Any], **kwargs: Dict[Any, Any]) -> Optional[str]:
         """Call the run method with the provided arguments.
 
         Args:

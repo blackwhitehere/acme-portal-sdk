@@ -16,7 +16,7 @@ However, rather than dictating an exact deployment implementation, the two packa
 
 In a way, they attempt to make the deployment process as frictionless and intuitive as possible, without simplifying the deployment to a restrained set of practices.
 
-`acme-portal-sdk` contains abstract interfaces expected by the `VSCode` `acme-portal` extension as well as a specific implementation of a deployment process for a python application based on the `prefect` orchestration library. Users of the SDK can easily extend the abstract interfaces to their projects. Some standard implementation schemes like one based on e.g. `airflow` can be made part of SDK in the future.
+`acme-portal-sdk` contains abstract interfaces expected by the `VSCode` `acme-portal` extension. It also contains a specific implementation for a python application based on the `prefect` orchestration library. Users of the SDK can easily extend the abstract interfaces to their projects. Some standard implementation schemes like one based on e.g. `airflow` can be made part of SDK in the future.
 
 ## Concepts
 

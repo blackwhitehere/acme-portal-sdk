@@ -6,21 +6,33 @@
     options:
       show_root_heading: true
       show_source: false
+      show_signature: true
+      show_signature_annotations: true
+      signature_crossrefs: true
 
 ::: acme_portal_sdk.deployment_finder
     options:
       show_root_heading: true
       show_source: false
+      show_signature: true
+      show_signature_annotations: true
+      signature_crossrefs: true
 
 ::: acme_portal_sdk.flow_deploy
     options:
       show_root_heading: true
       show_source: false
+      show_signature: true
+      show_signature_annotations: true
+      signature_crossrefs: true
 
 ::: acme_portal_sdk.deployment_promote
     options:
       show_root_heading: true
       show_source: false
+      show_signature: true
+      show_signature_annotations: true
+      signature_crossrefs: true
 
 ## Prefect
 
@@ -28,21 +40,33 @@
     options:
       show_root_heading: true
       show_source: false
+      show_signature: true
+      show_signature_annotations: true
+      signature_crossrefs: true
 
 ::: acme_portal_sdk.prefect.deployment_finder
     options:
       show_root_heading: true
       show_source: false
+      show_signature: true
+      show_signature_annotations: true
+      signature_crossrefs: true
 
 ::: acme_portal_sdk.prefect.flow_deploy
     options:
       show_root_heading: true
       show_source: false
+      show_signature: true
+      show_signature_annotations: true
+      signature_crossrefs: true
 
 ::: acme_portal_sdk.prefect.deployment_promote
     options:
       show_root_heading: true
       show_source: false
+      show_signature: true
+      show_signature_annotations: true
+      signature_crossrefs: true
 
 ## GitHub
 
@@ -50,3 +74,6 @@
     options:
       show_root_heading: true
       show_source: false
+      show_signature: true
+      show_signature_annotations: true
+      signature_crossrefs: true
