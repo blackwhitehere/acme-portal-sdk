@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from typing import Any, Dict, List
 
 
@@ -23,6 +23,7 @@ class FlowDetails:
         source_relative: Relative path to the source file from some known root
         import_path: Python import path to the source file
         grouping: Desired grouping of the flow in the context of the project (for navigation)
+        child_attributes: Additional attributes that can be set by subclasses
     """
 
     name: str
@@ -38,15 +39,31 @@ class FlowDetails:
     source_relative: str
     import_path: str
     grouping: List[str]
+    child_attributes: Dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert the FlowDetails to a dictionary suitable for JSON serialization."""
-        return asdict(self)
+        result = asdict(self)
+        # Merge child_attributes into the main dictionary, excluding the child_attributes key itself
+        child_attrs = result.pop('child_attributes', {})
+        result.update(child_attrs)
+        return result
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "FlowDetails":
         """Create a FlowDetails instance from a dictionary representation."""
-        return cls(**data)
+        # Get the expected field names from the dataclass
+        expected_fields = set(cls.__dataclass_fields__.keys())
+        
+        # Separate known fields from unknown fields  
+        known_fields = {k: v for k, v in data.items() if k in expected_fields and k != 'child_attributes'}
+        child_attributes = {k: v for k, v in data.items() if k not in expected_fields}
+        
+        # Add any existing child_attributes from the data
+        if 'child_attributes' in data:
+            child_attributes.update(data['child_attributes'])
+        
+        return cls(child_attributes=child_attributes, **known_fields)
 
 
 class FlowFinder(ABC):

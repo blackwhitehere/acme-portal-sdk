@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from typing import Any, Dict, List
 
 
@@ -21,6 +21,7 @@ class DeploymentDetails:
         updated_at: Timestamp of when the deployment was last updated
         flow_id: Unique identifier for the flow in the deployment system
         url: URL to the deployment in the deployment system
+        child_attributes: Additional attributes that can be set by subclasses
     """
 
     name: str
@@ -36,15 +37,31 @@ class DeploymentDetails:
     updated_at: str
     flow_id: str
     url: str
+    child_attributes: Dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert the DeploymentDetails to a dictionary suitable for JSON serialization."""
-        return asdict(self)
+        result = asdict(self)
+        # Merge child_attributes into the main dictionary, excluding the child_attributes key itself
+        child_attrs = result.pop('child_attributes', {})
+        result.update(child_attrs)
+        return result
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "DeploymentDetails":
         """Create a DeploymentDetails instance from a dictionary representation."""
-        return cls(**data)
+        # Get the expected field names from the dataclass
+        expected_fields = set(cls.__dataclass_fields__.keys())
+        
+        # Separate known fields from unknown fields  
+        known_fields = {k: v for k, v in data.items() if k in expected_fields and k != 'child_attributes'}
+        child_attributes = {k: v for k, v in data.items() if k not in expected_fields}
+        
+        # Add any existing child_attributes from the data
+        if 'child_attributes' in data:
+            child_attributes.update(data['child_attributes'])
+        
+        return cls(child_attributes=child_attributes, **known_fields)
 
 
 class DeploymentFinder(ABC):
