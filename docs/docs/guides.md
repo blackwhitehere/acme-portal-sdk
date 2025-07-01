@@ -98,109 +98,39 @@ hello_world:
 
 ## Creating Custom Workflow Implementations
 
-The SDK provides flexible workflow interfaces that allow you to create custom implementations for different deployment and promotion strategies.
+Both [`DeployWorkflow`](api.md#acme_portal_sdk.flow_deploy.DeployWorkflow) and [`PromoteWorkflow`](api.md#acme_portal_sdk.deployment_promote.PromoteWorkflow) use flexible signatures (`*args, **kwargs`) allowing custom implementations to accept additional parameters beyond the standard ones.
 
-### Flexible Workflow Signatures
-
-Both [`DeployWorkflow`](api.md#acme_portal_sdk.flow_deploy.DeployWorkflow) and [`PromoteWorkflow`](api.md#acme_portal_sdk.deployment_promote.PromoteWorkflow) use flexible method signatures with `*args, **kwargs` to support different implementation requirements:
-
+### Basic Usage
 ```python
-class DeployWorkflow(ABC):
-    @abstractmethod
-    def run(self, *args: Any, **kwargs: Any) -> Optional[str]:
-        """Run deployment workflow with flexible parameters."""
-        pass
-
-class PromoteWorkflow(ABC):
-    @abstractmethod  
-    def run(self, *args: Any, **kwargs: Any) -> Optional[str]:
-        """Run promotion workflow with flexible parameters."""
-        pass
-```
-
-This design allows implementations to:
-- Accept additional parameters beyond the basic requirements
-- Support different deployment patterns and configurations
-- Maintain backward compatibility with existing usage
-- Enable future extensibility without breaking changes
-
-### Common Parameters
-
-While implementations can accept any parameters, these are commonly used:
-
-**Deploy workflows:**
-- `flows_to_deploy`: List of flow names to deploy
-- `ref`: Git reference (branch/tag) to deploy
-- `project_name`: Name of the project
-- `env`: Target environment
-- `image_uri`: Docker image URI
-- `package_version`: Package version
-
-**Promote workflows:**
-- `flows_to_deploy`: List of flow names to promote
-- `source_env`: Source environment name
-- `target_env`: Target environment name  
-- `ref`: Git reference to promote
-
-### Example: Custom Deploy Workflow
-
-```python
-from acme_portal_sdk.flow_deploy import DeployWorkflow
-from typing import Any, Optional
-
-class CustomDeployWorkflow(DeployWorkflow):
-    def run(self, *args: Any, **kwargs: Any) -> Optional[str]:
-        # Extract standard parameters
-        flows = kwargs.get('flows_to_deploy', args[0] if args else [])
-        ref = kwargs.get('ref', args[1] if len(args) > 1 else 'main')
-        
-        # Handle custom parameters for your deployment strategy
-        environment = kwargs.get('environment', 'dev')
-        config = kwargs.get('deployment_config', {})
-        webhook = kwargs.get('notification_webhook')
-        retry_count = kwargs.get('retry_count', 3)
-        
-        # Your custom deployment logic
-        return self.execute_custom_deployment(
-            flows, ref, environment, config, webhook, retry_count
-        )
-    
-    def execute_custom_deployment(self, flows, ref, env, config, webhook, retries):
-        # Implement your custom deployment logic here
-        # Return URL or identifier of the deployment
-        pass
-```
-
-### Usage Examples
-
-**Basic usage (backward compatible):**
-```python
-# These calls work with any implementation
+# Standard calls work with any implementation
 deploy_workflow.run(["flow1", "flow2"], "main")
 promote_workflow.run(["flow1"], "dev", "prod", "main")
 ```
 
-**Extended usage with custom parameters:**
+### Custom Implementation Example
 ```python
-# Deploy with additional configuration
-deploy_workflow.run(
-    flows_to_deploy=["user-service", "auth-service"],
-    ref="feature/new-auth",
-    environment="staging",
-    deployment_config={"replicas": 3, "memory_limit": "512Mi"},
-    notification_webhook="https://hooks.slack.com/webhooks/...",
-    retry_count=5
-)
+from acme_portal_sdk.flow_deploy import DeployWorkflow
 
-# Promote with advanced options
-promote_workflow.run(
-    flows_to_deploy=["payment-processor"],
-    source_env="staging",
-    target_env="production",
-    ref="release/v2.1.0",
-    approval_required=True,
-    health_checks=["api-health", "database-connectivity"]
-)
+class CustomDeployWorkflow(DeployWorkflow):
+    def run(self, *args, **kwargs):
+        flows = kwargs.get('flows_to_deploy', args[0] if args else [])
+        ref = kwargs.get('ref', args[1] if len(args) > 1 else 'main')
+        
+        # Accept custom parameters
+        environment = kwargs.get('environment', 'dev')
+        config = kwargs.get('deployment_config', {})
+        
+        # Your deployment logic here
+        return self.execute_deployment(flows, ref, environment, config)
 ```
 
-This flexibility enables you to build workflow implementations that meet your specific deployment requirements while maintaining compatibility with the acme-portal VSCode extension.
+### Extended Usage
+```python
+# Use additional parameters as needed
+deploy_workflow.run(
+    flows_to_deploy=["service1", "service2"],
+    ref="main",
+    environment="staging",
+    deployment_config={"replicas": 3}
+)
+```
