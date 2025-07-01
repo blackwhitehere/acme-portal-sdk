@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from typing import Any, Dict, List
 
 
@@ -23,6 +23,7 @@ class FlowDetails:
         source_relative: Relative path to the source file from some known root
         import_path: Python import path to the source file
         grouping: Desired grouping of the flow in the context of the project (for navigation)
+        child_attributes: Additional attributes that can be set by subclasses
     """
 
     name: str
@@ -38,6 +39,7 @@ class FlowDetails:
     source_relative: str
     import_path: str
     grouping: List[str]
+    child_attributes: Dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert the FlowDetails to a dictionary suitable for JSON serialization."""

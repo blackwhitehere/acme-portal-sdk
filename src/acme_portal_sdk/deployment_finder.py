@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from typing import Any, Dict, List
 
 
@@ -21,6 +21,7 @@ class DeploymentDetails:
         updated_at: Timestamp of when the deployment was last updated
         flow_id: Unique identifier for the flow in the deployment system
         url: URL to the deployment in the deployment system
+        child_attributes: Additional attributes that can be set by subclasses
     """
 
     name: str
@@ -36,6 +37,7 @@ class DeploymentDetails:
     updated_at: str
     flow_id: str
     url: str
+    child_attributes: Dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert the DeploymentDetails to a dictionary suitable for JSON serialization."""
