@@ -79,13 +79,27 @@ class DeployWorkflow(ABC):
     """Encapsulates the deployment workflow for a flow."""
 
     @abstractmethod
-    def run(self, flows_to_deploy: List[str], ref: str) -> Optional[str]:
+    def run(self, *args: Any, **kwargs: Any) -> Optional[str]:
         """
         Run the deployment workflow for the specified flows.
 
-        Args:
+        This method accepts flexible arguments to allow different implementations
+        to require different parameters based on their specific needs.
+
+        Common parameters that implementations may expect:
             flows_to_deploy: List of flow names to deploy
             ref: The git ref (branch/tag) for the workflow
+            project_name: Name of the project
+            branch_name: Name of the branch
+            commit_hash: Git commit hash
+            image_uri: Docker image URI
+            package_version: Package version
+            env: Target environment
+
+        Args:
+            *args: Positional arguments specific to the implementation
+            **kwargs: Keyword arguments specific to the implementation
+
         Returns:
             Optional[str]: URL of the deployment if successful, None otherwise
         """
