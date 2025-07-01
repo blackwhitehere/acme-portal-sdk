@@ -2,7 +2,7 @@
 # Using multi-stage image builds to create a final image without uv and any build tools.
 
 # Use a Python image
-FROM python:3.12 AS builder
+FROM python:3.9 AS builder
 
 # Install anything needed to build the project
 RUN pip install uv
@@ -30,9 +30,9 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 
 # Then, use a final image
-FROM python:3.12
+FROM python:3.9
 # It is important to use the image that matches the builder, as the path to the
-# Python executable must be the same, e.g., using `python:3.12-alpine`
+# Python executable must be the same, e.g., using `python:3.9-alpine`
 # will fail.
 
 # Copy the application from the builder

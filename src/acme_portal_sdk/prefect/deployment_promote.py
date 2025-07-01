@@ -4,11 +4,9 @@ from typing import Any, Dict, List, Optional
 from prefect.client.orchestration import get_client
 
 from acme_portal_sdk.deployment_promote import DeploymentPromote
-from acme_portal_sdk.prefect.flow_deploy import (
-    PrefectDeployInfo,
-    PrefectDeployInfoPrep,
-    PrefectFlowDeployer,
-)
+from acme_portal_sdk.prefect.flow_deploy import (PrefectDeployInfo,
+                                                 PrefectDeployInfoPrep,
+                                                 PrefectFlowDeployer)
 
 
 class PrefectDeploymentPromote(DeploymentPromote):

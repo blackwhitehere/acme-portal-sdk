@@ -1,10 +1,12 @@
 import argparse
+import importlib.util
 import os
 import shutil
-from pathlib import Path
 import sys
-import importlib.util
+from pathlib import Path
 from typing import Optional
+
+from acme_portal_sdk.version_check import check_compatibility_and_warn
 
 
 def parse_args():
@@ -119,6 +121,9 @@ def main_logic(args):
 
 
 def main():
+    # Check Python version compatibility and show warning if needed
+    check_compatibility_and_warn()
+    
     args = parse_args()
     main_logic(args)
 
