@@ -205,35 +205,37 @@ class GitHubWorkflowService:
 class GithubActionsDeployWorkflow(DeployWorkflow):
     """Implements the DeployWorkflow interface using GitHub Actions"""
 
-    def __init__(self, workflow_file: str = "deploy.yml"):
+    def __init__(self, workflow_file: str = "deploy.yml", default_ref: str = "main"):
         """
         Initialize the GitHub Actions deploy workflow.
 
         Args:
             workflow_file: The workflow file name (default: deploy.yml)
+            default_ref: Default git ref to use if none provided in run() (default: main)
         """
         self.workflow_file = workflow_file
+        self.default_ref = default_ref
         self.command_executor = CommandExecutor()
         self.git_service = GitService(self.command_executor)
         self.workflow_service = GitHubWorkflowService(
             self.command_executor, self.git_service
         )
 
-    def run(
-        self, flows_to_deploy: List[str], ref: Optional[str] = None
-    ) -> Optional[str]:
+    def run(self, flows_to_deploy: List[str], ref: Optional[str] = None, **kwargs) -> Optional[str]:
         """
         Run the deployment workflow for the specified flows using GitHub Actions.
 
         Args:
             flows_to_deploy: List of flow names to deploy
-            ref: The git ref (branch/tag) for the workflow, defaults to the one provided at initialization
+            ref: The git ref (branch/tag) for the workflow (optional, uses default_ref if not provided)
+            **kwargs: Additional workflow parameters (for future extensibility)
 
         Returns:
             Optional[str]: URL of the workflow run if successful, None otherwise
         """
-        # Use the ref provided or fall back to the one set during initialization
-        workflow_ref = ref if ref is not None else self.ref
+        # Use default ref if none provided
+        if ref is None:
+            ref = getattr(self, 'default_ref', 'main')
 
         # Convert list to comma-separated string for GitHub Actions input
         flows_str = ",".join(flows_to_deploy)
@@ -243,7 +245,7 @@ class GithubActionsDeployWorkflow(DeployWorkflow):
 
         # Trigger the workflow
         run_url = self.workflow_service.trigger_workflow(
-            self.workflow_file, workflow_inputs, workflow_ref
+            self.workflow_file, workflow_inputs, ref
         )
 
         if run_url:
@@ -275,21 +277,24 @@ class GithubActionsPromoteWorkflow(PromoteWorkflow):
             self.command_executor, self.git_service
         )
 
-    def run(
-        self, flows_to_deploy: List[str], source_env: str, target_env: str, ref: str
-    ) -> Optional[str]:
+    def run(self, flows_to_deploy: List[str], source_env: Optional[str] = None, target_env: Optional[str] = None, ref: Optional[str] = None, **kwargs) -> Optional[str]:
         """
         Run the promotion workflow for the specified flows using GitHub Actions.
 
         Args:
             flows_to_deploy: List of flow names to promote
-            source_env: Source environment
-            target_env: Target environment
-            ref: The git ref (branch/tag) for the workflow
+            source_env: Source environment (required)
+            target_env: Target environment (required)
+            ref: The git ref (branch/tag) for the workflow (required)
+            **kwargs: Additional workflow parameters (for future extensibility)
 
         Returns:
             Optional[str]: URL of the workflow run if successful, None otherwise
         """
+        # Validate required parameters
+        if not source_env or not target_env or not ref:
+            raise ValueError("source_env, target_env, and ref are required parameters")
+
         # Convert list to comma-separated string for GitHub Actions input
         flows_str = ",".join(flows_to_deploy)
 

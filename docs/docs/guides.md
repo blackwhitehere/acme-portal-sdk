@@ -95,3 +95,42 @@ hello_world:
     description: Hello World
     work_pool_name: ecs-pool
 ```
+
+## Creating Custom Workflow Implementations
+
+Both [`DeployWorkflow`](api.md#acme_portal_sdk.flow_deploy.DeployWorkflow) and [`PromoteWorkflow`](api.md#acme_portal_sdk.deployment_promote.PromoteWorkflow) use flexible signatures (`*args, **kwargs`) allowing custom implementations to accept additional parameters beyond the standard ones.
+
+### Basic Usage
+```python
+# Standard calls work with any implementation
+deploy_workflow.run(["flow1", "flow2"], "main")
+promote_workflow.run(["flow1"], "dev", "prod", "main")
+```
+
+### Custom Implementation Example
+```python
+from acme_portal_sdk.flow_deploy import DeployWorkflow
+
+class CustomDeployWorkflow(DeployWorkflow):
+    def run(self, *args, **kwargs):
+        flows = kwargs.get('flows_to_deploy', args[0] if args else [])
+        ref = kwargs.get('ref', args[1] if len(args) > 1 else 'main')
+        
+        # Accept custom parameters
+        environment = kwargs.get('environment', 'dev')
+        config = kwargs.get('deployment_config', {})
+        
+        # Your deployment logic here
+        return self.execute_deployment(flows, ref, environment, config)
+```
+
+### Extended Usage
+```python
+# Use additional parameters as needed
+deploy_workflow.run(
+    flows_to_deploy=["service1", "service2"],
+    ref="main",
+    environment="staging",
+    deployment_config={"replicas": 3}
+)
+```
