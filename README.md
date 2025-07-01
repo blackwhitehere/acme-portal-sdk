@@ -65,6 +65,22 @@ If you are using VSCode, set to use this env via `Python: Select Interpreter` co
 
 * Run `pre-commit install` to install the pre-commit hooks.
 
+## Python Version Compatibility
+
+This SDK requires Python 3.9 or higher. To check if your Python version is compatible, you can use the built-in version checker:
+
+```bash
+aps-version-check
+```
+
+For a simple compatibility status:
+
+```bash
+aps-version-check --quiet
+```
+
+The version checker is also automatically integrated into the main SDK commands (`aps` and `aps-prefect-deploy`) and will display warnings if you're using an incompatible Python version.
+
 ## Project template
 
 This project has been setup with `acme-project-create`, a python code template library.

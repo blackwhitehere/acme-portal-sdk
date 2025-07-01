@@ -6,7 +6,8 @@ from typing import List
 
 from prefect.client.orchestration import get_client
 
-from acme_portal_sdk.deployment_finder import DeploymentDetails, DeploymentFinder
+from acme_portal_sdk.deployment_finder import (DeploymentDetails,
+                                               DeploymentFinder)
 
 
 class PrefectDeploymentFinder(DeploymentFinder):

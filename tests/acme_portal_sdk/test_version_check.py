@@ -5,13 +5,11 @@ from unittest.mock import patch
 
 import pytest
 
-from acme_portal_sdk.version_check import (
-    get_python_version,
-    get_required_python_version,
-    is_python_version_compatible,
-    get_version_info_message,
-    check_compatibility_and_warn,
-)
+from acme_portal_sdk.version_check import (check_compatibility_and_warn,
+                                           get_python_version,
+                                           get_required_python_version,
+                                           get_version_info_message,
+                                           is_python_version_compatible)
 
 
 def test_get_python_version():

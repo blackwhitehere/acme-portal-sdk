@@ -5,11 +5,10 @@ from pathlib import Path
 from typing import List
 
 from acme_config import add_main_arguments, load_saved_parameters
-from acme_portal_sdk.prefect.flow_deploy import (
-    PrefectDeployInfoPrep,
-    PrefectFlowDeployer,
-)
+
 from acme_portal_sdk.prefect.deployment_promote import PrefectDeploymentPromote
+from acme_portal_sdk.prefect.flow_deploy import (PrefectDeployInfoPrep,
+                                                 PrefectFlowDeployer)
 from acme_portal_sdk.version_check import check_compatibility_and_warn
 
 logger = logging.getLogger(__name__)
