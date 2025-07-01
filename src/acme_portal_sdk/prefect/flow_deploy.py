@@ -3,7 +3,7 @@ import logging
 from dataclasses import dataclass
 from importlib.util import find_spec
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from prefect.events import (
     DeploymentCompoundTrigger,
@@ -67,7 +67,7 @@ class PrefectDeployInfoPrep(DeployInfoPrep):
 
     def __init__(
         self,
-        static_flow_deploy_config: Path | str,
+        static_flow_deploy_config: Union[Path, str],
         default_work_pool: str,
         prefect_flow_finder: PrefectFlowFinder,
     ):

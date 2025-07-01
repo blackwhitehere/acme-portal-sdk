@@ -8,11 +8,12 @@ version = "0.0.11"
 description = "SDK to customize behaviour of acme-portal VSCode extension"
 readme = "README.md"
 classifiers = [
+    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.9"
 dependencies = ["python-dotenv"]
 
 [[project.authors]]
@@ -21,6 +22,7 @@ email = "guner.stan@gmail.com"
 [project.scripts]
 aps = "acme_portal_sdk._main:main"
 aps-prefect-deploy = "acme_portal_sdk.prefect_deploy:main"
+aps-version-check = "acme_portal_sdk.version_check:main"
 
 [project.urls]
 homepage = "https://blackwhitehere.github.io/acme-portal-sdk/"

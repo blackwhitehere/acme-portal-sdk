@@ -29,13 +29,13 @@ class DeployInfo:
     flow_name: str
     work_pool_name: Optional[str] = None
     work_queue_name: Optional[str] = None
-    parameters: Optional[dict[str, Any]] = None
-    job_variables: Optional[dict] = None
+    parameters: Optional[Dict[str, Any]] = None
+    job_variables: Optional[Dict] = None
     cron: Optional[str] = None
     paused: Optional[bool] = False
     concurrency_limit: Optional[int] = 1
     description: Optional[str] = None
-    tags: Optional[list[str]] = None
+    tags: Optional[List[str]] = None
 
 
 class DeployInfoPrep(ABC):

@@ -10,6 +10,7 @@ from acme_portal_sdk.prefect.flow_deploy import (
     PrefectFlowDeployer,
 )
 from acme_portal_sdk.prefect.deployment_promote import PrefectDeploymentPromote
+from acme_portal_sdk.version_check import check_compatibility_and_warn
 
 logger = logging.getLogger(__name__)
 
@@ -225,6 +226,9 @@ def main_logic(args):
 
 
 def main():
+    # Check Python version compatibility and show warning if needed
+    check_compatibility_and_warn()
+    
     args = parse_args()
     main_logic(args)
 
