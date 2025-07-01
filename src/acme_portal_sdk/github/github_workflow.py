@@ -2,7 +2,7 @@ import json
 import os
 import subprocess
 import time
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, Optional, Tuple
 
 from ..deployment_promote import PromoteWorkflow
 from ..flow_deploy import DeployWorkflow
