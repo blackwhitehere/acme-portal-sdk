@@ -41,27 +41,12 @@ class DeploymentDetails:
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert the DeploymentDetails to a dictionary suitable for JSON serialization."""
-        result = asdict(self)
-        # Merge child_attributes into the main dictionary, excluding the child_attributes key itself
-        child_attrs = result.pop('child_attributes', {})
-        result.update(child_attrs)
-        return result
+        return asdict(self)
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "DeploymentDetails":
         """Create a DeploymentDetails instance from a dictionary representation."""
-        # Get the expected field names from the dataclass
-        expected_fields = set(cls.__dataclass_fields__.keys())
-        
-        # Separate known fields from unknown fields  
-        known_fields = {k: v for k, v in data.items() if k in expected_fields and k != 'child_attributes'}
-        child_attributes = {k: v for k, v in data.items() if k not in expected_fields}
-        
-        # Add any existing child_attributes from the data
-        if 'child_attributes' in data:
-            child_attributes.update(data['child_attributes'])
-        
-        return cls(child_attributes=child_attributes, **known_fields)
+        return cls(**data)
 
 
 class DeploymentFinder(ABC):

@@ -1,4 +1,3 @@
-import pytest
 from acme_portal_sdk.flow_finder import FlowDetails
 
 
@@ -49,8 +48,8 @@ class TestFlowDetails:
         
         assert flow.child_attributes == child_attrs
 
-    def test_to_dict_merges_child_attributes(self):
-        """Test that to_dict() merges child_attributes into the main dictionary."""
+    def test_to_dict_keeps_child_attributes_separate(self):
+        """Test that to_dict() keeps child_attributes as a separate key."""
         child_attrs = {"custom_field": "custom_value", "priority": 1}
         
         flow = FlowDetails(
@@ -72,16 +71,17 @@ class TestFlowDetails:
         
         result = flow.to_dict()
         
-        # Child attributes should be merged into the main dictionary
-        assert result["custom_field"] == "custom_value"
-        assert result["priority"] == 1
+        # Child attributes should be kept as a separate key
+        assert "child_attributes" in result
+        assert result["child_attributes"] == child_attrs
         assert result["name"] == "test_flow"
         
-        # child_attributes key should not be present in the result
-        assert "child_attributes" not in result
+        # Custom attributes should not be merged into the main dictionary
+        assert "custom_field" not in result
+        assert "priority" not in result
 
-    def test_to_dict_without_child_attributes(self):
-        """Test that to_dict() works correctly when child_attributes is empty."""
+    def test_to_dict_with_empty_child_attributes(self):
+        """Test that to_dict() includes child_attributes even when empty."""
         flow = FlowDetails(
             name="test_flow",
             original_name="test-flow",
@@ -104,11 +104,12 @@ class TestFlowDetails:
         assert result["name"] == "test_flow"
         assert result["obj_type"] == "function"
         
-        # child_attributes key should not be present
-        assert "child_attributes" not in result
+        # child_attributes key should be present even if empty
+        assert "child_attributes" in result
+        assert result["child_attributes"] == {}
 
-    def test_from_dict_extracts_child_attributes(self):
-        """Test that from_dict() properly extracts child_attributes."""
+    def test_from_dict_with_child_attributes(self):
+        """Test that from_dict() properly handles child_attributes."""
         data = {
             "name": "test_flow",
             "original_name": "test-flow",
@@ -123,9 +124,10 @@ class TestFlowDetails:
             "source_relative": "relative/path.py",
             "import_path": "test_module.source",
             "grouping": ["group1", "group2"],
-            # These should become child_attributes
-            "custom_field": "custom_value",
-            "priority": 1,
+            "child_attributes": {
+                "custom_field": "custom_value",
+                "priority": 1,
+            }
         }
         
         flow = FlowDetails.from_dict(data)
@@ -134,8 +136,8 @@ class TestFlowDetails:
         assert flow.child_attributes["custom_field"] == "custom_value"
         assert flow.child_attributes["priority"] == 1
 
-    def test_from_dict_with_explicit_child_attributes(self):
-        """Test from_dict() when child_attributes is explicitly provided."""
+    def test_from_dict_without_child_attributes(self):
+        """Test from_dict() when child_attributes is not provided."""
         data = {
             "name": "test_flow",
             "original_name": "test-flow",
@@ -150,16 +152,12 @@ class TestFlowDetails:
             "source_relative": "relative/path.py",
             "import_path": "test_module.source",
             "grouping": ["group1", "group2"],
-            "child_attributes": {"existing_attr": "existing_value"},
-            # This should also be added to child_attributes
-            "custom_field": "custom_value",
         }
         
         flow = FlowDetails.from_dict(data)
         
         assert flow.name == "test_flow"
-        assert flow.child_attributes["existing_attr"] == "existing_value"
-        assert flow.child_attributes["custom_field"] == "custom_value"
+        assert flow.child_attributes == {}
 
     def test_round_trip_serialization(self):
         """Test that to_dict() and from_dict() work together properly."""
@@ -224,8 +222,11 @@ class TestFlowDetails:
         assert extended_flow.child_attributes["priority"] == 5
         assert extended_flow.child_attributes["category"] == "important"
         
-        # Test serialization works
+        # Test serialization keeps child_attributes separate
         data = extended_flow.to_dict()
-        assert data["priority"] == 5
-        assert data["category"] == "important"
-        assert "child_attributes" not in data
+        assert "child_attributes" in data
+        assert data["child_attributes"]["priority"] == 5
+        assert data["child_attributes"]["category"] == "important"
+        # Custom attributes should not be in the main dictionary
+        assert "priority" not in data
+        assert "category" not in data
