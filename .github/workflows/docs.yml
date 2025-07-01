@@ -1,27 +1,26 @@
-name: Run Unit Tests - CI
+name: Deploy Documentation
 
 on:
   push:
     branches:
       - main
-    tags:
-      - 'v*'
     paths:
+      - 'docs/**'
       - 'src/**'
-      - 'tests/**'
-      - 'uv.lock'
       - 'pyproject.toml'
-      - 'Dockerfile'
-      - '.dockerignore'
-      - '.python-version'
-  pull_request:
-    branches:
-      - '*'
+      - '.github/workflows/docs.yml'
 
 jobs:
-  build_and_test:
+  deploy_docs:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: read
+      id-token: write
+      pages: write
+    
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -40,11 +39,16 @@ jobs:
     - name: Install the project
       run: uv sync --all-extras --dev
 
-    - name: Run tests
-      run: |
-        uv run pytest tests
-        
     - name: Build documentation
       run: |
         cd docs
         uv run mkdocs build
+
+    - name: Upload documentation artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: docs/site
+
+    - name: Deploy Docs to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
