@@ -2,7 +2,7 @@ import json
 import os
 import subprocess
 import time
-from typing import Dict, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from ..deployment_promote import PromoteWorkflow
 from ..flow_deploy import DeployWorkflow
@@ -221,27 +221,21 @@ class GithubActionsDeployWorkflow(DeployWorkflow):
             self.command_executor, self.git_service
         )
 
-    def run(self, *args, **kwargs) -> Optional[str]:
+    def run(self, flows_to_deploy: List[str], ref: Optional[str] = None, **kwargs) -> Optional[str]:
         """
         Run the deployment workflow for the specified flows using GitHub Actions.
 
         Args:
-            flows_to_deploy: List of flow names to deploy (positional or keyword arg)
-            ref: The git ref (branch/tag) for the workflow (positional or keyword arg)
+            flows_to_deploy: List of flow names to deploy
+            ref: The git ref (branch/tag) for the workflow (optional, uses default_ref if not provided)
+            **kwargs: Additional workflow parameters (for future extensibility)
 
         Returns:
             Optional[str]: URL of the workflow run if successful, None otherwise
         """
-        # Extract flows_to_deploy and ref from args/kwargs
-        if len(args) >= 1:
-            flows_to_deploy = args[0]
-        else:
-            flows_to_deploy = kwargs.get('flows_to_deploy', [])
-        
-        if len(args) >= 2:
-            ref = args[1]
-        else:
-            ref = kwargs.get('ref', self.default_ref)
+        # Use default ref if none provided
+        if ref is None:
+            ref = getattr(self, 'default_ref', 'main')
 
         # Convert list to comma-separated string for GitHub Actions input
         flows_str = ",".join(flows_to_deploy)
@@ -283,40 +277,20 @@ class GithubActionsPromoteWorkflow(PromoteWorkflow):
             self.command_executor, self.git_service
         )
 
-    def run(self, *args, **kwargs) -> Optional[str]:
+    def run(self, flows_to_deploy: List[str], source_env: Optional[str] = None, target_env: Optional[str] = None, ref: Optional[str] = None, **kwargs) -> Optional[str]:
         """
         Run the promotion workflow for the specified flows using GitHub Actions.
 
         Args:
-            flows_to_deploy: List of flow names to promote (positional or keyword arg)
-            source_env: Source environment (positional or keyword arg)
-            target_env: Target environment (positional or keyword arg)
-            ref: The git ref (branch/tag) for the workflow (positional or keyword arg)
+            flows_to_deploy: List of flow names to promote
+            source_env: Source environment (required)
+            target_env: Target environment (required)
+            ref: The git ref (branch/tag) for the workflow (required)
+            **kwargs: Additional workflow parameters (for future extensibility)
 
         Returns:
             Optional[str]: URL of the workflow run if successful, None otherwise
         """
-        # Extract parameters from args/kwargs
-        if len(args) >= 1:
-            flows_to_deploy = args[0]
-        else:
-            flows_to_deploy = kwargs.get('flows_to_deploy', [])
-        
-        if len(args) >= 2:
-            source_env = args[1]
-        else:
-            source_env = kwargs.get('source_env')
-        
-        if len(args) >= 3:
-            target_env = args[2]
-        else:
-            target_env = kwargs.get('target_env')
-        
-        if len(args) >= 4:
-            ref = args[3]
-        else:
-            ref = kwargs.get('ref')
-
         # Validate required parameters
         if not source_env or not target_env or not ref:
             raise ValueError("source_env, target_env, and ref are required parameters")
