@@ -1,6 +1,5 @@
 """Tests for flexible workflow method signatures."""
 
-import pytest
 from typing import Any, Optional
 
 from acme_portal_sdk.flow_deploy import DeployWorkflow

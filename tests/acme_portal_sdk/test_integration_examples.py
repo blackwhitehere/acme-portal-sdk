@@ -1,6 +1,6 @@
 """Integration test showing the practical benefits of flexible signatures."""
 
-from typing import Any, Optional, List
+from typing import Any, Optional
 
 from acme_portal_sdk.flow_deploy import DeployWorkflow
 from acme_portal_sdk.deployment_promote import PromoteWorkflow
