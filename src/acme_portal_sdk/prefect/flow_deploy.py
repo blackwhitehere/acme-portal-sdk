@@ -3,16 +3,13 @@ import logging
 from dataclasses import dataclass
 from importlib.util import find_spec
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
-from prefect.events import (
-    DeploymentCompoundTrigger,
-    DeploymentEventTrigger,
-    DeploymentMetricTrigger,
-    DeploymentSequenceTrigger,
-)
+from prefect.events import (DeploymentCompoundTrigger, DeploymentEventTrigger,
+                            DeploymentMetricTrigger, DeploymentSequenceTrigger)
 
-from acme_portal_sdk.flow_deploy import DeployInfo, DeployInfoPrep, FlowDeployer
+from acme_portal_sdk.flow_deploy import (DeployInfo, DeployInfoPrep,
+                                         FlowDeployer)
 from acme_portal_sdk.prefect.flow_finder import PrefectFlowFinder
 
 
@@ -67,7 +64,7 @@ class PrefectDeployInfoPrep(DeployInfoPrep):
 
     def __init__(
         self,
-        static_flow_deploy_config: Path | str,
+        static_flow_deploy_config: Union[Path, str],
         default_work_pool: str,
         prefect_flow_finder: PrefectFlowFinder,
     ):
