@@ -37,11 +37,11 @@ The `acme-portal` VSCode extension then displays flow and deployment infromation
 
 The SDK and `acme-portal` are intended to complement use of CICD pipelines in cases where deployments can not be fully automated.
 
-For explanation on how to configure your project to work with `acme-portal` using the SDK, checkout [Configuring SDK for your project](guides.md#configuring-sdk-for-your-project)
+For explanation on how to configure your project to work with `acme-portal` using the SDK, checkout [Configuring SDK for your project](user/user-guides.md#configuring-sdk-for-your-project)
 
-For explanation of the features provided by default `prefect` based implementation checkout [Default functionality of `prefect` based implementation](features.md#default-functionality-of-prefect-based-implementation)
+For explanation of the features provided by default `prefect` based implementation checkout [Default functionality of `prefect` based implementation](user/features.md#default-functionality-of-prefect-based-implementation)
 
-See guide [Using default `prefect` based functionality](guides.md#using-default-prefect-based-functionality) for how to configure your project to work with `acme-portal` using the default `prefect` based implementation. You can view a sample project using it under [`acme-prefect`](https://github.com/blackwhitehere/acme-prefect).
+See guide [Using default `prefect` based functionality](user/user-guides.md#using-default-prefect-based-functionality) for how to configure your project to work with `acme-portal` using the default `prefect` based implementation. You can view a sample project using it under [`acme-prefect`](https://github.com/blackwhitehere/acme-prefect).
 
 
 ## Python environment

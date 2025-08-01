@@ -77,3 +77,5 @@ TODO.md
 
 # ruff
 .ruff_cache/
+# Test environment
+test_env/

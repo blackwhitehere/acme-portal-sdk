@@ -11,12 +11,12 @@
 
 and attempt to find instances of any child classes of:
 
-* `flow_finder.py` -> [`FlowFinder`](api.md#acme_portal_sdk.flow_finder.FlowFinder)
-* `deployment_finder.py` -> [`DeploymentFinder`](api.md#acme_portal_sdk.deployment_finder.DeploymentFinder)
-* `flow_deploy.py` -> [`DeployWorkflow`](api.md#acme_portal_sdk.flow_deploy.DeployWorkflow)
-* `deployment_promote.py` -> [`PromoteWorkflow`](api.md#acme_portal_sdk.deployment_promote.PromoteWorkflow)
+* `flow_finder.py` -> [`FlowFinder`](../developer/api-reference.md#acme_portal_sdk.flow_finder.FlowFinder)
+* `deployment_finder.py` -> [`DeploymentFinder`](../developer/api-reference.md#acme_portal_sdk.deployment_finder.DeploymentFinder)
+* `flow_deploy.py` -> [`DeployWorkflow`](../developer/api-reference.md#acme_portal_sdk.flow_deploy.DeployWorkflow)
+* `deployment_promote.py` -> [`PromoteWorkflow`](../developer/api-reference.md#acme_portal_sdk.deployment_promote.PromoteWorkflow)
 
-`acme-portal` will then use them to delegate UI operations performed by the user in `VSCode` extension to appropriate `SDK` class. e.g. using `Deploy` button in UI will trigger a call to [`DeployWorkflow.run`](api.md#acme_portal_sdk.flow_deploy.DeployWorkflow.run) method etc.
+`acme-portal` will then use them to delegate UI operations performed by the user in `VSCode` extension to appropriate `SDK` class. e.g. using `Deploy` button in UI will trigger a call to [`DeployWorkflow.run`](../developer/api-reference.md#acme_portal_sdk.flow_deploy.DeployWorkflow.run) method etc.
 
 ## Using default `prefect` based functionality
 
@@ -40,7 +40,7 @@ flow_finder = PrefectFlowFinder(
 
 ### `deployment_finder.py`
 
-[`PrefectDeploymentFinder`](api.md#acme_portal_sdk.prefect.deployment_finder.PrefectDeploymentFinder) will require prefect client to be authenticated against prefect server like Prefect Cloud before use. You can do this by running `prefect cloud login` and completing the auth process when running locally. For running in CI pipeline you'd need to define `PREFECT_API_KEY` and `PREFECT_API_URL`. Consult prefect [documentation](https://docs.prefect.io/v3/api-ref/rest-api) for how to define it.
+[`PrefectDeploymentFinder`](../developer/api-reference.md#acme_portal_sdk.prefect.deployment_finder.PrefectDeploymentFinder) will require prefect client to be authenticated against prefect server like Prefect Cloud before use. You can do this by running `prefect cloud login` and completing the auth process when running locally. For running in CI pipeline you'd need to define `PREFECT_API_KEY` and `PREFECT_API_URL`. Consult prefect [documentation](https://docs.prefect.io/v3/api-ref/rest-api) for how to define it.
 
 ```python
 # .acme-portal-sdk/deployment_finder.py
@@ -61,7 +61,7 @@ View the example workflow files in the repository's `.github/workflows/` directo
 * Modifying default image and package name
 * Modifying logic to establish IMAGE_URI created in a seperate image build job
 * Using [`acme-config`](https://github.com/blackwhitehere/acme-config) to pull environment variables to be used in the deployment
-* Using `aps-prefect-deploy` command that relies on static config file read by [`PrefectDeployInfoPrep`](api.md#acme_portal_sdk.prefect.flow_deploy.PrefectDeployInfoPrep) to specify per flow deployment config.
+* Using `aps-prefect-deploy` command that relies on static config file read by [`PrefectDeployInfoPrep`](../developer/api-reference.md#acme_portal_sdk.prefect.flow_deploy.PrefectDeployInfoPrep) to specify per flow deployment config.
 
 ```python
 # .acme-portal-sdk/flow_deploy.py
@@ -83,7 +83,7 @@ promote = GithubActionsPromoteWorkflow(workflow_file="promote.yml")
 
 ### `static_flow_deploy_config.yaml`
 
-Will be read by [`PrefectDeployInfoPrep`](api.md#acme_portal_sdk.prefect.flow_deploy.PrefectDeployInfoPrep) used by `aps-prefect-deploy` command that is called from `deploy.yml` and `promote.yml` via `aps-prefect-deploy` call. It allows to define static deployment configuration that varies by deployed flow.
+Will be read by [`PrefectDeployInfoPrep`](../developer/api-reference.md#acme_portal_sdk.prefect.flow_deploy.PrefectDeployInfoPrep) used by `aps-prefect-deploy` command that is called from `deploy.yml` and `promote.yml` via `aps-prefect-deploy` call. It allows to define static deployment configuration that varies by deployed flow.
 
 ```yaml
 hello_world:
@@ -96,7 +96,7 @@ hello_world:
 
 ## Creating Custom Workflow Implementations
 
-Both [`DeployWorkflow`](api.md#acme_portal_sdk.flow_deploy.DeployWorkflow) and [`PromoteWorkflow`](api.md#acme_portal_sdk.deployment_promote.PromoteWorkflow) use flexible signatures (`*args, **kwargs`) allowing custom implementations to accept additional parameters beyond the standard ones.
+Both [`DeployWorkflow`](../developer/api-reference.md#acme_portal_sdk.flow_deploy.DeployWorkflow) and [`PromoteWorkflow`](../developer/api-reference.md#acme_portal_sdk.deployment_promote.PromoteWorkflow) use flexible signatures (`*args, **kwargs`) allowing custom implementations to accept additional parameters beyond the standard ones.
 
 ### Basic Usage
 ```python
