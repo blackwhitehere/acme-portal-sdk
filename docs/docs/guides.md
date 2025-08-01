@@ -51,11 +51,9 @@ deployment_finder = PrefectDeploymentFinder()
 
 ### `flow_deploy.py`
 
-Relies on using GitHub Actions workflow `.github/workflows/deploy.yml` which can be copied from `acme_portal_sdk` (alongside `test.yml`, `container.yml` and `promote.yml` pipelines) to `.github/workflows` directory using command (in root of your project):
+Relies on using GitHub Actions workflow `.github/workflows/deploy.yml`. You will need to create your own workflow files based on your project's requirements.
 
-    aps github-copy
-
-View `deploy.yml` for details how to adapt your project to it including:
+View the example workflow files in the repository's `.github/workflows/` directory for guidance on how to adapt your project including:
 
 * Creating `deploy-prefect` GitHub Environment to hold GitHub `secrets` for connecting to AWS (`acme-config` backend) and Prefect Cloud (`prefect` server).
 * Modifying any default triggers for the workflow
