@@ -19,6 +19,6 @@ The actions of last two are performed by calling:
 
 The implementation of those base classes can be provided and configured by user in their project. Moreover, the `acme-portal-sdk` package provides concrete implementation of all of those classes for a python project based on `prefect` and using GitHub Actions for CICD.
 
-For explanation on how to configure your project to work with `acme-portal` using the SDK, checkout [Configuring SDK for your project](guides.md#configuring-sdk-for-your-project)
+For explanation on how to configure your project to work with `acme-portal` using the SDK, checkout [Configuring SDK for your project](../user/user-guides.md#configuring-sdk-for-your-project)
 
-For explanation of the features provided by default `prefect` based implementation checkout [Default functionality of `prefect` based implementation](features.md#default-functionality-of-prefect-based-implementation)
+For explanation of the features provided by default `prefect` based implementation checkout [Default functionality of `prefect` based implementation](../user/features.md#default-functionality-of-prefect-based-implementation)

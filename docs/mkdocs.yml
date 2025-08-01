@@ -1,16 +1,82 @@
 site_name: acme-portal-sdk
+site_description: SDK to customize behaviour of acme-portal VSCode extension
+site_url: https://blackwhitehere.github.io/acme-portal-sdk/
+repo_url: https://github.com/blackwhitehere/acme-portal-sdk
+repo_name: blackwhitehere/acme-portal-sdk
+edit_uri: edit/main/docs/
+
 theme:
-  name: material # readthedocs
+  name: material
+  palette:
+    # Palette toggle for automatic mode
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+
+    # Palette toggle for light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: blue
+      accent: blue
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: blue
+      accent: blue
+      toggle:
+        icon: material/brightness-4
+        name: Switch to system preference
+
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - search.highlight
+    - search.suggest
+    - content.code.copy
+    - content.action.edit
+
 nav:
-  - Introduction: index.md
-  - Installation: install.md
-  - Architecture: architecture.md
-  - Features: features.md
-  - User Guides: guides.md
-  - API Reference: api.md
-  - Release Notes: release_notes.md
-extra_css:
-  - stylesheets/extra.css
+  - Home: index.md
+  - User:
+    - Features: user/features.md
+    - Installation: user/install.md
+    - Getting Started: user/getting-started.md
+    - User Guides: user/user-guides.md
+    - Cheat Sheet: user/cheat-sheet.md
+    - Release Notes: user/release-notes.md
+  - Developer:
+    - Contributing: developer/contributing.md
+    - API Reference: developer/api-reference.md
+    - Architecture: developer/architecture.md
+
+markdown_extensions:
+  - admonition
+  - codehilite:
+      guess_lang: false
+  - toc:
+      permalink: true
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
 
 plugins:
-- mkdocstrings
+  - search
+  - mkdocstrings
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/blackwhitehere/acme-portal-sdk
+
+extra_css:
+  - stylesheets/extra.css
