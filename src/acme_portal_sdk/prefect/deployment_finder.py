@@ -106,11 +106,11 @@ class PrefectDeploymentFinder(DeploymentFinder):
             return result
         except ImportError:
             print("Error: Prefect package not installed or not found")
-            return []
+            raise
         except Exception as e:
             print(f"Error getting deployments: {str(e)}")
             traceback.print_exc(file=sys.stderr)
-            return []
+            raise
 
 
 if __name__ == "__main__":
