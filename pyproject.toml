@@ -39,6 +39,7 @@ dev = [
     "pre-commit",           # for pre-commit hooks
 ]
 prefect = ["prefect", "acme_config"]
+airflow = ["apache-airflow>=3.0.0", "requests"]
 
 [tool.setuptools]
 package-dir = { "" = "src" }

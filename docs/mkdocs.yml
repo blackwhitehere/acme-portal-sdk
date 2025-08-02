@@ -48,6 +48,8 @@ nav:
     - Installation: user/install.md
     - Getting Started: user/getting-started.md
     - User Guides: user/user-guides.md
+    - Prefect Support: user/prefect.md
+    - Airflow Support: user/airflow.md
     - Cheat Sheet: user/cheat-sheet.md
     - Release Notes: user/release-notes.md
   - Developer:
