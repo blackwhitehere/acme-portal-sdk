@@ -56,6 +56,13 @@ class AirflowFlowDeployer(FlowDeployer):
     def deploy(self, flow_deploy_info: DeployInfo) -> None:
         """Deploy a flow to Airflow.
 
+        WARNING: This implementation is incomplete and Airflow deployment steps 
+        vary by specific setup. In production environments, you may need to:
+        - Copy DAG files to the DAGs folder
+        - Use DAG synchronization mechanisms (Git-sync, S3, etc.)
+        - Implement custom deployment logic for your Airflow setup
+        - Handle DAG dependencies and requirements
+
         For Airflow, deployment typically means:
         1. Ensuring the DAG file is in the DAGs folder
         2. Optionally triggering a DAG refresh

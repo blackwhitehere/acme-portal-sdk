@@ -75,10 +75,20 @@ def main():
 
         if airflow_url:
             try:
-                AirflowFlowDeployer()  # Test if we can create deployer
-                print(
-                    "Note: Would call deployer.deploy(deploy_info) if DAG exists in Airflow"
+                deployer = AirflowFlowDeployer(
+                    airflow_url=airflow_url,
+                    username=username,
+                    password=password
                 )
+                print(f"Created deployer for {airflow_url}")
+                
+                # Actually call deploy and check if it worked
+                try:
+                    deployer.deploy(deploy_info)
+                    print(f"✓ Successfully deployed {deploy_info.name}")
+                except Exception as deploy_error:
+                    print(f"⚠ Deployment failed (expected if DAG doesn't exist): {deploy_error}")
+                    
             except Exception as e:
                 print(f"Could not create deployer: {e}")
 
