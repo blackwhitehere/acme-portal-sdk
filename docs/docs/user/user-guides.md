@@ -132,3 +132,7 @@ deploy_workflow.run(
     deployment_config={"replicas": 3}
 )
 ```
+
+## Using GitHub Workflows for Deployment and Promotion
+
+For detailed instructions on using GitHub Actions as a provider for `DeployWorkflow` and `PromoteWorkflow`, refer to the [GitHub Workflows Guide](github-workflows.md).
