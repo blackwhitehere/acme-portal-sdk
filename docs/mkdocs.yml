@@ -42,8 +42,8 @@ theme:
     - content.action.edit
 
 nav:
-  - Home: index.md
   - User:
+    - Introduction: index.md
     - Features: user/features.md
     - Installation: user/install.md
     - Getting Started: user/getting-started.md

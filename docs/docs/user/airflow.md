@@ -1,6 +1,8 @@
 # Airflow Support
 
-The acme-portal-sdk now includes built-in support for Apache Airflow as a source of flow definitions and as a backend for fetching existing deployments.
+The acme-portal-sdk includes built-in support for using Apache Airflow as a source of flow definitions and as a backend for fetching existing deployments.
+
+NOTE: Since deployment of Airflow DAGs varies based on exact Airflow setup `AirflowFlowDeployer` and `AirflowDeploymentPromote` implementations are shown for interface demonstration pruposes and you should provide an implementation specific for your airflow deployment.
 
 ## Installation
 
@@ -51,7 +53,8 @@ Environment variables can also be used:
 
 ### AirflowFlowDeployer
 
-Deploys flows to Airflow by updating DAG configuration:
+Deploys flows to Airflow by updating DAG configuration.
+Note: Provided for interface demonstration purposes. You need to provide your own implementation specific to your Airflow setup.
 
 ```python
 from acme_portal_sdk.airflow.flow_deploy import AirflowFlowDeployer
@@ -74,7 +77,8 @@ deployer.deploy(deploy_info)
 
 ### AirflowDeploymentPromote
 
-Promotes DAGs between different Airflow environments:
+Promotes DAGs between different Airflow environments.
+Note: Provided for interface demonstration purposes. You need to provide your own implementation specific to your Airflow setup.
 
 ```python
 from acme_portal_sdk.airflow.deployment_promote import AirflowDeploymentPromote
@@ -99,7 +103,7 @@ promoter.promote(
 
 ## DAG Naming Convention
 
-The Airflow integration works best with DAGs that follow this naming convention:
+The Airflow integration works with DAGs that follow this naming convention:
 
 ```
 {project_name}--{branch}--{flow_name}--{environment}

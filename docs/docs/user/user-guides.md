@@ -53,13 +53,13 @@ deployment_finder = PrefectDeploymentFinder()
 
 Relies on using GitHub Actions workflow `.github/workflows/deploy.yml`. You will need to create your own workflow files based on your project's requirements.
 
-View the example workflow files in the repository's `.github/workflows/` directory for guidance on how to adapt your project including:
+View the [example workflow files](https://github.com/blackwhitehere/acme-prefect/tree/main/.github/workflows) in the `acme-prefect` repository's `.github/workflows/` directory for guidance on how to adapt your project including:
 
 * Creating `deploy-prefect` GitHub Environment to hold GitHub `secrets` for connecting to AWS (`acme-config` backend) and Prefect Cloud (`prefect` server).
 * Modifying any default triggers for the workflow
 * Specifying conatiner image registry (`ghcr.io` by default)
 * Modifying default image and package name
-* Modifying logic to establish IMAGE_URI created in a seperate image build job
+* Modifying logic to establish `IMAGE_URI` created in a seperate image build job
 * Using [`acme-config`](https://github.com/blackwhitehere/acme-config) to pull environment variables to be used in the deployment
 * Using `aps-prefect-deploy` command that relies on static config file read by [`PrefectDeployInfoPrep`](../developer/api-reference.md#acme_portal_sdk.prefect.flow_deploy.PrefectDeployInfoPrep) to specify per flow deployment config.
 

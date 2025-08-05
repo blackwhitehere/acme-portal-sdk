@@ -22,7 +22,7 @@ pip install acme_portal_sdk
 Test that your configuration is working:
 
 ```bash
-aps --help
+aps check-config
 ```
 
 ## Next Steps
@@ -36,3 +36,4 @@ aps --help
 - [Configuration Guide](user-guides.md#configuring-sdk-for-your-project)
 - [Prefect Implementation](user-guides.md#using-default-prefect-based-functionality) 
 - [API Reference](../developer/api-reference.md)
+- [Example project using the SDK](https://github.com/blackwhitehere/acme-prefect)

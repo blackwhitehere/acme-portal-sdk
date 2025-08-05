@@ -2,6 +2,18 @@
 
     pip install acme_portal_sdk
 
-## Requirements
+## For prefect:
 
-* GitHub CLI `gh` client needs to be installed for `GithubActionsDeployWorkflow` and `GithubActionsPromoteWorkflow`.
+```bash
+pip install acme-portal-sdk[prefect]
+```
+
+## For Airflow:
+
+```bash
+pip install acme-portal-sdk[airflow]
+```
+
+## GitHub
+
+* GitHub CLI `gh` client needs to be installed when using `GithubActionsDeployWorkflow` and `GithubActionsPromoteWorkflow`.

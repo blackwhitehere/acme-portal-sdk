@@ -10,14 +10,15 @@ Quick reference for common acme-portal-sdk tasks and commands.
 # Get help
 aps --help
 
+# Check SDK configuration is correctly setup in a project
+aps check-config
+
 # Deploy using prefect
 aps-prefect-deploy deploy --help
 
 # Promote deployment
 aps-prefect-deploy promote --help
 
-# Copy GitHub workflows
-aps github-copy
 ```
 
 ### Configuration Files
@@ -93,7 +94,4 @@ prefect profile ls
 
 # Validate flow configuration
 python -c "from .acme_portal_sdk.flow_finder import *"
-
-# Test deployment configuration
-aps-prefect-deploy deploy --dry-run
 ```
