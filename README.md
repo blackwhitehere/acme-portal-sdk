@@ -42,29 +42,3 @@ For explanation on how to configure your project to work with `acme-portal` usin
 For explanation of the features provided by default `prefect` based implementation checkout [Default functionality of `prefect` based implementation](user/features.md#default-functionality-of-prefect-based-implementation)
 
 See guide [Using default `prefect` based functionality](user/user-guides.md#using-default-prefect-based-functionality) for how to configure your project to work with `acme-portal` using the default `prefect` based implementation. You can view a sample project using it under [`acme-prefect`](https://github.com/blackwhitehere/acme-prefect).
-
-
-## Python environment
-
-The project comes with a python development environment.
-To generate it, after checking out the repo run:
-
-    chmod +x create_env.sh
-
-Then to generate the environment (or update it to latest version based on state of `uv.lock`), run:
-
-    ./create_env.sh
-
-This will generate a new python virtual env under `.venv` directory. You can activate it via:
-
-    source .venv/bin/activate
-
-If you are using VSCode, set to use this env via `Python: Select Interpreter` command.
-
-## Required setup post checkout
-
-* Run `pre-commit install` to install the pre-commit hooks.
-
-## Project template
-
-This project has been setup with `acme-project-create`, a python code template library.
