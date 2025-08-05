@@ -5,13 +5,13 @@
 ## For prefect:
 
 ```bash
-pip install acme-portal-sdk[prefect]
+pip install acme_portal_sdk[prefect]
 ```
 
 ## For Airflow:
 
 ```bash
-pip install acme-portal-sdk[airflow]
+pip install acme_portal_sdk[airflow]
 ```
 
 ## GitHub
