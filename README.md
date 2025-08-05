@@ -7,6 +7,8 @@ SDK to provide data and actions for `acme-portal` `VSCode` [extension](https://g
 Rather than embedding a pre-defined logic in `acme-portal` extension, the SDK
 allows to define sources of data and behaviour for extension functionality. As such, the extension servers as UI layer to the implementation provided by SDK objects.
 
+[AI wiki](https://deepwiki.com/blackwhitehere/acme-portal-sdk/)
+
 ## Problem
 
 A repeatable source of pain while working on software is that deployment processes are highly specific to a given project. While the application may be written in a well known language or framework, the deployment process is usually specialized to a given application, team and company making it difficult for new and existing team members to understand how to just "ship" their code.
