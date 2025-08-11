@@ -41,7 +41,7 @@ dev = [
 ]
 prefect = [
     "prefect",
-    "acme-config==0.0.14",
+    "acme-config>=0.0.14",
 ]
 airflow = ["apache-airflow>=3.0.0", "requests"]
 
