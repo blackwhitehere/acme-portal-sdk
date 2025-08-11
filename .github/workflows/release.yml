@@ -39,7 +39,7 @@ jobs:
     needs: test
     environment: release-pypi # This environment can publish to PyPI, needs to be setup in the repo settings
     permissions: # needed to access the PyPI token: https://docs.astral.sh/uv/guides/publish/#publishing-your-package
-      contents: 'read'
+      contents: 'write'  # Changed from 'read' to 'write' to allow updating CHANGELOG.md
       id-token: write
     
     steps:
@@ -99,3 +99,27 @@ jobs:
       - name: Publish package
         run: |
           uv publish
+
+      - name: Update CHANGELOG.md for release
+        run: |
+          # Extract version from git tag (remove 'v' prefix)
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "Updating CHANGELOG.md for version: $VERSION"
+          
+          # Update changelog
+          python scripts/update_changelog_after_release.py "$VERSION"
+          
+          # Configure git for automated commits
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+          # Check if there are changes to commit
+          if git diff --quiet CHANGELOG.md; then
+            echo "No changes to CHANGELOG.md, skipping commit"
+          else
+            # Commit and push the changelog update
+            git add CHANGELOG.md
+            git commit -m "chore: update CHANGELOG.md for release $VERSION [skip ci]"
+            git push origin HEAD:main
+            echo "Successfully updated CHANGELOG.md and pushed changes"
+          fi

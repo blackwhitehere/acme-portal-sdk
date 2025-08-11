@@ -202,11 +202,13 @@ We follow [Semantic Versioning](https://semver.org/):
    # This is typically done by maintainers
    ```
 
-3. **Move Release Notes**
-   - Create new version section in `CHANGELOG.md`
-   - Move all items from `[Unreleased]` to the new version section
-   - Add release date: `## [1.0.0] - 2024-01-15`
-   - Leave `[Unreleased]` section empty for future changes
+3. **~~Move Release Notes~~ (Automated)**
+   - ~~Create new version section in `CHANGELOG.md`~~
+   - ~~Move all items from `[Unreleased]` to the new version section~~
+   - ~~Add release date: `## [1.0.0] - 2024-01-15`~~
+   - ~~Leave `[Unreleased]` section empty for future changes~~
+   
+   *This step is now automated by the release workflow. After publishing, the workflow will automatically update `CHANGELOG.md` by moving the `[Unreleased]` content to a new versioned section and creating a fresh `[Unreleased]` section.*
 
 4. **Create and Push Tag**
    ```bash
@@ -221,6 +223,7 @@ We follow [Semantic Versioning](https://semver.org/):
      - Extract release notes from `CHANGELOG.md`
      - Create GitHub release with proper release notes
      - Publish to PyPI (if configured)
+     - **Update `CHANGELOG.md`** by moving `[Unreleased]` content to the new version section and creating a fresh `[Unreleased]` section
 
 ## Architecture Overview
 
