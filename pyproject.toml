@@ -8,11 +8,12 @@ version = "0.0.12"
 description = "acme-portal-sdk helps to manage deployments for applications that implement \"flows\" (Jobs/DAGs/Workflows). It's intended to be used with acme-portal VSCode extension."
 readme = "README.md"
 classifiers = [
+    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.9"
 dependencies = ["python-dotenv"]
 
 [[project.authors]]
@@ -20,7 +21,7 @@ email = "guner.stan@gmail.com"
 
 [project.scripts]
 aps = "acme_portal_sdk._main:main"
-aps-prefect-deploy = "acme_portal_sdk.prefect_deploy:main"
+aps-prefect-deploy = "acme_portal_sdk.prefect.prefect_deploy:main"
 
 [project.urls]
 homepage = "https://blackwhitehere.github.io/acme-portal-sdk/"
@@ -38,7 +39,10 @@ dev = [
     "ruff",                 # for linting
     "pre-commit",           # for pre-commit hooks
 ]
-prefect = ["prefect", "acme_config"]
+prefect = [
+    "prefect",
+    "acme-config>=0.0.14",
+]
 airflow = ["apache-airflow>=3.0.0", "requests"]
 
 [tool.setuptools]
