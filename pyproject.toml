@@ -39,7 +39,10 @@ dev = [
     "ruff",                 # for linting
     "pre-commit",           # for pre-commit hooks
 ]
-prefect = ["prefect", "acme_config"]
+prefect = [
+    "prefect",
+    "acme-config==0.0.14",
+]
 airflow = ["apache-airflow>=3.0.0", "requests"]
 
 [tool.setuptools]
