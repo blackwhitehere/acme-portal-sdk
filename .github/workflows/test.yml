@@ -40,6 +40,10 @@ jobs:
     - name: Install the project
       run: uv sync --all-extras --dev
 
+    - name: Check release notes format
+      run: |
+        python scripts/check_release_notes.py
+        
     - name: Run tests
       run: |
         uv run pytest tests

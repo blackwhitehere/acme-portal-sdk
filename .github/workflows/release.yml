@@ -39,7 +39,7 @@ jobs:
     needs: test
     environment: release-pypi # This environment can publish to PyPI, needs to be setup in the repo settings
     permissions: # needed to access the PyPI token: https://docs.astral.sh/uv/guides/publish/#publishing-your-package
-      contents: 'read'
+      contents: 'write'  # Changed from 'read' to 'write' to allow updating CHANGELOG.md
       id-token: write
     
     steps:
@@ -61,6 +61,65 @@ jobs:
         run: |
           uv build
 
+      - name: Extract release notes
+        id: extract_notes
+        run: |
+          echo "Extracting release notes from CHANGELOG.md..."
+          # Extract version from git tag (remove 'v' prefix)
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "Version: $VERSION"
+          
+          # Try to extract notes for specific version, fallback to unreleased section
+          if python scripts/extract_release_notes.py "$VERSION" 2>/dev/null; then
+            RELEASE_NOTES=$(python scripts/extract_release_notes.py "$VERSION")
+          else
+            echo "No notes found for version $VERSION, using unreleased section"
+            RELEASE_NOTES=$(python scripts/extract_release_notes.py)
+          fi
+          
+          # Save to file and environment variable for GitHub Actions
+          echo "$RELEASE_NOTES" > release-notes.txt
+          
+          # Set output for use in release creation
+          echo "release_notes<<EOF" >> $GITHUB_OUTPUT
+          echo "$RELEASE_NOTES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          
+          echo "Release notes extracted successfully"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref }}
+          name: Release ${{ github.ref_name }}
+          body: ${{ steps.extract_notes.outputs.release_notes }}
+          draft: false
+          prerelease: false
+
       - name: Publish package
         run: |
           uv publish
+
+      - name: Update CHANGELOG.md for release
+        run: |
+          # Extract version from git tag (remove 'v' prefix)
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "Updating CHANGELOG.md for version: $VERSION"
+          
+          # Update changelog
+          python scripts/update_changelog_after_release.py "$VERSION"
+          
+          # Configure git for automated commits
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+          # Check if there are changes to commit
+          if git diff --quiet CHANGELOG.md; then
+            echo "No changes to CHANGELOG.md, skipping commit"
+          else
+            # Commit and push the changelog update
+            git add CHANGELOG.md
+            git commit -m "chore: update CHANGELOG.md for release $VERSION [skip ci]"
+            git push origin HEAD:main
+            echo "Successfully updated CHANGELOG.md and pushed changes"
+          fi

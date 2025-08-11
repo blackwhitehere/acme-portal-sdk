@@ -10,3 +10,33 @@ Design systems to have orthogonal functionality.
 
 Check for python typing information in method signatures is correct and if documentation needs to be updated to reflect existing funcionality.
 Keep documentation concise but informative and avoid excess comments that just describe what code is doing.
+
+## Release Notes Requirements
+
+**Every pull request must include a release notes entry in CHANGELOG.md**
+
+When making changes:
+1. **Always add an entry to the `[Unreleased]` section** in CHANGELOG.md
+2. **Use the appropriate category**:
+   - `### Added` - for new features
+   - `### Changed` - for changes in existing functionality  
+   - `### Fixed` - for bug fixes
+   - `### Security` - for security-related changes
+   - `### Deprecated` - for soon-to-be removed features
+   - `### Removed` - for removed features
+
+3. **Format entries correctly**:
+   ```markdown
+   - **Feature/Fix Name**: Brief description of the change (#PR_NUMBER)
+   ```
+
+4. **Include PR reference**: Always add the PR number in parentheses for linking
+5. **Make it user-focused**: Describe the change from the user's perspective, not implementation details
+
+**Example entry:**
+```markdown
+### Added
+- **Deploy Progress Notifications**: Added real-time progress updates during flow deployment operations (#42)
+```
+
+See docs/docs/developer/contributing.md for complete release notes guidelines.

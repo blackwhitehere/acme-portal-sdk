@@ -44,3 +44,7 @@ For explanation on how to configure your project to work with `acme-portal` usin
 For explanation of the features provided by default `prefect` based implementation checkout [Default functionality of `prefect` based implementation](user/features.md#default-functionality-of-prefect-based-implementation)
 
 See guide [Using default `prefect` based functionality](user/user-guides.md#using-default-prefect-based-functionality) for how to configure your project to work with `acme-portal` using the default `prefect` based implementation. You can view a sample project using it under [`acme-prefect`](https://github.com/blackwhitehere/acme-prefect).
+
+## Development
+
+For detailed development setup, contribution guidelines, and release notes process, see [docs/docs/developer/contributing.md](docs/docs/developer/contributing.md).
