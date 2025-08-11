@@ -4,7 +4,30 @@ import sys
 from pathlib import Path
 from typing import List
 
-from acme_config import add_main_arguments, load_saved_parameters
+# Optional import for acme_config - provide fallback if not available
+try:
+    from acme_config import add_main_arguments, load_saved_parameters
+except ImportError:
+    # Fallback implementations when acme_config is not available
+    def add_main_arguments(parser: argparse.ArgumentParser) -> None:
+        """Fallback implementation for add_main_arguments when acme_config is not available."""
+        parser.add_argument("-app-name", required=True, type=str, help="Application name")
+        parser.add_argument("-env", required=True, type=str, help="Environment")
+        parser.add_argument("-ver-number", required=True, type=int, help="Version number")
+
+    def load_saved_parameters(app_name: str, env: str, ver_number: int) -> dict:
+        """Fallback implementation for load_saved_parameters when acme_config is not available."""
+        import os
+        from dotenv import load_dotenv
+        
+        # Try to load from standard .env file pattern
+        env_file = f"{app_name}.{env}.{ver_number}.env"
+        if os.path.exists(env_file):
+            load_dotenv(env_file)
+        
+        # Return all environment variables as a fallback
+        return dict(os.environ)
+
 from acme_portal_sdk.prefect.flow_deploy import (
     PrefectDeployInfoPrep,
     PrefectFlowDeployer,

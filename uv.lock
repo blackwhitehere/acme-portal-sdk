@@ -1,23 +1,10 @@
 version = 1
 revision = 2
-requires-python = ">=3.10"
+requires-python = ">=3.9"
 resolution-markers = [
     "python_full_version >= '3.13'",
     "python_full_version >= '3.11' and python_full_version < '3.13'",
-    "python_full_version < '3.11'",
-]
-
-[[package]]
-name = "acme-config"
-version = "0.0.13"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "boto3" },
-    { name = "python-dotenv" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/a7/52/b731485a4de3b522e9e54d9787edb6b60ff6cd57e4d092132494968a2331/acme_config-0.0.13.tar.gz", hash = "sha256:45159fd474ec315e993bb75d147d6595f4ac7685fd9c7f52b00fe504b377d89b", size = 5325, upload-time = "2025-02-20T14:17:19.235Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/e1/89/529078582ea9450d5d21c10371dc907c8b223774587f5831563e0bafae3d/acme_config-0.0.13-py3-none-any.whl", hash = "sha256:59acb013c88cbe0bac9f883a81aa21f04b3eab6352f6ea4c0d849ec05bea4888", size = 5754, upload-time = "2025-02-20T14:17:17.488Z" },
+    "python_full_version >= '3.9' and python_full_version < '3.11'",
 ]
 
 [[package]]
@@ -41,13 +28,11 @@ dev = [
     { name = "uv" },
 ]
 prefect = [
-    { name = "acme-config" },
     { name = "prefect" },
 ]
 
 [package.metadata]
 requires-dist = [
-    { name = "acme-config", marker = "extra == 'prefect'" },
     { name = "isort", marker = "extra == 'dev'" },
     { name = "jupyterlab", marker = "extra == 'dev'" },
     { name = "mkdocs", marker = "extra == 'dev'" },

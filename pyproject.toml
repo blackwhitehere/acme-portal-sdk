@@ -8,11 +8,12 @@ version = "0.0.12"
 description = "acme-portal-sdk helps to manage deployments for applications that implement \"flows\" (Jobs/DAGs/Workflows). It's intended to be used with acme-portal VSCode extension."
 readme = "README.md"
 classifiers = [
+    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.9"
 dependencies = ["python-dotenv"]
 
 [[project.authors]]
@@ -38,7 +39,7 @@ dev = [
     "ruff",                 # for linting
     "pre-commit",           # for pre-commit hooks
 ]
-prefect = ["prefect", "acme_config"]
+prefect = ["prefect"]
 airflow = ["apache-airflow>=3.0.0", "requests"]
 
 [tool.setuptools]
