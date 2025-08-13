@@ -1,7 +1,5 @@
 # Contributing
 
-> **Note:** This page is maintained for documentation purposes. For the most up-to-date development practices and contribution guidelines, please refer to [CONTRIBUTING.md](../../../CONTRIBUTING.md) in the repository root.
-
 Thank you for your interest in contributing to acme-portal-sdk! This guide will help you get started with development.
 
 ## Development Setup
@@ -190,42 +188,6 @@ We follow [Semantic Versioning](https://semver.org/):
 - Breaking changes increment MAJOR
 - New features increment MINOR  
 - Bug fixes increment PATCH
-
-### Creating a Release
-
-1. **Prepare Release Notes**
-   - Review all entries in the `[Unreleased]` section
-   - Ensure all changes are properly categorized and described
-   - Verify all PR numbers are correct and linked
-
-2. **Update Version**
-   ```bash
-   # Update pyproject.toml version
-   # This is typically done by maintainers
-   ```
-
-3. **~~Move Release Notes~~ (Automated)**
-   - ~~Create new version section in `CHANGELOG.md`~~
-   - ~~Move all items from `[Unreleased]` to the new version section~~
-   - ~~Add release date: `## [1.0.0] - 2024-01-15`~~
-   - ~~Leave `[Unreleased]` section empty for future changes~~
-   
-   *This step is now automated by the release workflow. After publishing, the workflow will automatically update `CHANGELOG.md` by moving the `[Unreleased]` content to a new versioned section and creating a fresh `[Unreleased]` section.*
-
-4. **Create and Push Tag**
-   ```bash
-   git tag v1.0.0
-   git push origin v1.0.0
-   ```
-
-5. **Automated Release**
-   - GitHub Actions will automatically:
-     - Run all tests and quality checks
-     - Build the package
-     - Extract release notes from `CHANGELOG.md`
-     - Create GitHub release with proper release notes
-     - Publish to PyPI (if configured)
-     - **Update `CHANGELOG.md`** by moving `[Unreleased]` content to the new version section and creating a fresh `[Unreleased]` section
 
 ## Architecture Overview
 

@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Release Notes Process**: Standardized release notes workflow with automated validation and extraction (#17)
 - **Automated CHANGELOG.md Updates**: Release workflow now automatically updates CHANGELOG.md after publishing by moving [Unreleased] content to versioned sections (#17)
 
+### Changed
+- **README.md Reorganization**: Moved Problem and Concepts sections to user documentation, added minimal showcase, and created CONTRIBUTING.md as source of truth for development practices (#21)
+
 ## Historical Releases
 
 *Historical versions before release notes standardization. See git history for detailed changes.*

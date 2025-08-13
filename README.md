@@ -2,49 +2,87 @@
 
 > **Important:** This SDK is currently in alpha and primarily for demonstration purposes. APIs may still change frequently.
 
-SDK to provide data and actions for `acme-portal` `VSCode` [extension](https://github.com/blackwhitehere/acme-portal).
+## Overview
 
-Rather than embedding a pre-defined logic in `acme-portal` extension, the SDK
-allows to define sources of data and behaviour for extension functionality. As such, the extension servers as UI layer to the implementation provided by SDK objects.
+**acme-portal-sdk** is a Python SDK that provides data and actions for the `acme-portal` VSCode [extension](https://github.com/blackwhitehere/acme-portal). It standardizes the deployment workflow for Python applications that implement "flows" (Jobs/DAGs/Workflows) while allowing full customization of the underlying implementation.
 
-[AI wiki](https://deepwiki.com/blackwhitehere/acme-portal-sdk/)
+### Main Idea
 
-## Problem
+Rather than embedding pre-defined deployment logic in the VSCode extension, the SDK allows you to define custom sources of data and behavior. The extension serves as a UI layer to your SDK implementations, providing a consistent interface for:
 
-A repeatable source of pain while working on software is that deployment processes are highly specific to a given project. While the application may be written in a well known language or framework, the deployment process is usually specialized to a given application, team and company making it difficult for new and existing team members to understand how to just "ship" their code.
+- **Discovering flows** in your codebase
+- **Managing deployments** across environments 
+- **Promoting deployments** between environments (dev → staging → prod)
 
-`acme-portal` and `acme-portal-sdk` attempt to address that problem by proposing a standard UI & workflow of deploying a python application.
-However, rather than dictating an exact deployment implementation, the two packages jointly define only high level deployment concepts and allow users to customize the implementation.
+The SDK defines abstract interfaces that you implement according to your project's needs, whether using Prefect, Airflow, GitHub Actions, or custom deployment systems.
 
-In a way, they attempt to make the deployment process as frictionless and intuitive as possible, without simplifying the deployment to a restrained set of practices.
+## Quick Start
 
-`acme-portal-sdk` contains abstract interfaces expected by the `VSCode` `acme-portal` extension. It also contains a specific implementation for a python application based on the `prefect` orchestration library. Users of the SDK can easily extend the abstract interfaces to their projects. Some standard implementation schemes like one based on e.g. `airflow` can be made part of SDK in the future.
+To set up your project with acme-portal-sdk, create a `.acme_portal_sdk` directory in your project root with these files:
 
-## Concepts
+### 1. Install the SDK
 
-To the end of clarifying deployment process, the SDK defines the following concepts:
+```bash
+pip install acme_portal_sdk
+```
 
-* `Flow` - (often named in various frameworks as `Workflow` / `Job` / `DAG`) is a unit of work in an application. It can also be though of as an `executable script` or `entrypoint`. A `Flow` can have sub-elements like `Steps` / `Tasks` / `Nodes`, but those are not tracked by the SDK. Flows form a basis of what unit of computation is deployed. In this way an application is composed of multiple related `Flows` maintained by the team, with a desire to deploy them independently of each other.
-* `Deployment` - is a piece of configuration defined in an execution environment (e.g. `Prefect`/`Airflow` Server, a remote server, some AWS Resources) that defines how to run a unit of work (a `Flow`). `Deployment` is then capable of orchestrating physical resources (by e.g. submitting requests, having execute permissions) and generally use environment resources to perform computation.
-* `Environment` - (sometimes called `Namespace`, `Version`, `Label`) is a persistent identifier of an application version run in a given `Deployment`. Popular `Environment` names used are `dev`, `tst`, `uat`, `prod`. Environment names are useful to communicate release state of a given feature (and its code changes) in an application release cycle. They give meaning to statements like "those changes are in `dev` only", "this feature needs to be tested in `uat`", etc.
+### 2. Create SDK Configuration Files
 
-Having those concepts defined the SDK defines the following actions:
+```bash
+mkdir .acme_portal_sdk
+```
 
-* `Find Flows` - scan code or configration to find `Flows` which can be deployed
-* `Find Deployments` - find existing `Flow` deployment information 
-* `Deploy` - uses information about the `Flow` together with additional deployment configuration to create a `Deployment` in an initial, starting environment (e.g. `dev`).
-* `Promote` - having completed required validation steps on deployment outputs in a given environment, the code version used in source `Deployment` can be deployed to a target environment (e.g. from `dev` to `uat`)
+#### `.acme_portal_sdk/flow_finder.py`
+```python
+from acme_portal_sdk.prefect.flow_finder import PrefectFlowFinder
+from pathlib import Path
 
-The `acme-portal` VSCode extension then displays flow and deployment infromation and provides UI elements (buttons, forms) / VSCode tasks to trigger `Deploy` and `Promote` actions.
+# Create an instance to find flows in your project
+project_root = Path(__file__).parent.parent
+flow_finder = PrefectFlowFinder(
+    root_dir=str(project_root / "src" / "your_project_name")
+)
+```
 
-The SDK and `acme-portal` are intended to complement use of CICD pipelines in cases where deployments can not be fully automated.
+#### `.acme_portal_sdk/deployment_finder.py`
+```python
+from acme_portal_sdk.prefect.deployment_finder import PrefectDeploymentFinder
 
-For explanation on how to configure your project to work with `acme-portal` using the SDK, checkout [Configuring SDK for your project](user/user-guides.md#configuring-sdk-for-your-project)
+# Find existing deployments (requires Prefect authentication)
+deployment_finder = PrefectDeploymentFinder()
+```
 
-For explanation of the features provided by default `prefect` based implementation checkout [Default functionality of `prefect` based implementation](user/features.md#default-functionality-of-prefect-based-implementation)
+#### `.acme_portal_sdk/flow_deploy.py`
+```python
+from acme_portal_sdk.github.github_workflow import GithubActionsDeployWorkflow
 
-See guide [Using default `prefect` based functionality](user/user-guides.md#using-default-prefect-based-functionality) for how to configure your project to work with `acme-portal` using the default `prefect` based implementation. You can view a sample project using it under [`acme-prefect`](https://github.com/blackwhitehere/acme-prefect).
+# Deploy flows using GitHub Actions
+deploy = GithubActionsDeployWorkflow(workflow_file="deploy.yml")
+```
+
+#### `.acme_portal_sdk/deployment_promote.py`
+```python
+from acme_portal_sdk.github.github_workflow import GithubActionsPromoteWorkflow
+
+# Promote deployments between environments
+promote = GithubActionsPromoteWorkflow(workflow_file="promote.yml")
+```
+
+### 3. Install VSCode Extension
+
+Install the [`acme-portal` VSCode extension](https://github.com/blackwhitehere/acme-portal) to get the UI interface for managing your flows and deployments.
+
+## Documentation
+
+- **[Core Concepts](docs/docs/user/concepts.md)** - Understanding flows, deployments, and environments
+- **[User Guides](docs/docs/user/user-guides.md)** - Detailed configuration examples
+- **[Features](docs/docs/user/features.md)** - Available functionality and platform support
+- **[API Reference](docs/docs/developer/api-reference.md)** - Complete API documentation
+
+### Example Projects
+
+- **[acme-prefect](https://github.com/blackwhitehere/acme-prefect)** - Complete example using Prefect workflows
 
 ## Development
 
-For detailed development setup, contribution guidelines, and release notes process, see [docs/docs/developer/contributing.md](docs/docs/developer/contributing.md).
+For detailed development setup, contribution guidelines, and release notes process, see [CONTRIBUTING.md](CONTRIBUTING.md).
