@@ -18,118 +18,386 @@ and attempt to find instances of any child classes of:
 
 `acme-portal` will then use them to delegate UI operations performed by the user in `VSCode` extension to appropriate `SDK` class. e.g. using `Deploy` button in UI will trigger a call to [`DeployWorkflow.run`](../developer/api-reference.md#acme_portal_sdk.flow_deploy.DeployWorkflow.run) method etc.
 
-## Using default `prefect` based functionality
+## Using platform-specific implementations
 
-You can view a sample project using it under [`acme-prefect`](https://github.com/blackwhitehere/acme-prefect).
+For specific platform implementations:
 
-The SDK provides pre-built Prefect implementations you can use with minimal configuration. Below are example code snippets for each required file:
-
-### `flow_finder.py`
-
-```python
-# .acme-portal-sdk/flow_finder.py
-from acme_portal_sdk.prefect.flow_finder import PrefectFlowFinder, PrefectFlowDetails
-from pathlib import Path
-
-# Create an instance of PrefectFlowFinder
-project_root = Path(__file__).parent.parent
-flow_finder = PrefectFlowFinder(
-    root_dir=str(project_root / "src" / "your_project_name")
-)
-```
-
-### `deployment_finder.py`
-
-[`PrefectDeploymentFinder`](../developer/api-reference.md#acme_portal_sdk.prefect.deployment_finder.PrefectDeploymentFinder) will require prefect client to be authenticated against prefect server like Prefect Cloud before use. You can do this by running `prefect cloud login` and completing the auth process when running locally. For running in CI pipeline you'd need to define `PREFECT_API_KEY` and `PREFECT_API_URL`. Consult prefect [documentation](https://docs.prefect.io/v3/api-ref/rest-api) for how to define it.
-
-```python
-# .acme-portal-sdk/deployment_finder.py
-from acme_portal_sdk.prefect.deployment_finder import PrefectDeploymentFinder
-
-deployment_finder = PrefectDeploymentFinder()
-```
-
-### `flow_deploy.py`
-
-Relies on using GitHub Actions workflow `.github/workflows/deploy.yml`. You will need to create your own workflow files based on your project's requirements.
-
-View the [example workflow files](https://github.com/blackwhitehere/acme-prefect/tree/main/.github/workflows) in the `acme-prefect` repository's `.github/workflows/` directory for guidance on how to adapt your project including:
-
-* Creating `deploy-prefect` GitHub Environment to hold GitHub `secrets` for connecting to AWS (`acme-config` backend) and Prefect Cloud (`prefect` server).
-* Modifying any default triggers for the workflow
-* Specifying conatiner image registry (`ghcr.io` by default)
-* Modifying default image and package name
-* Modifying logic to establish `IMAGE_URI` created in a seperate image build job
-* Using [`acme-config`](https://github.com/blackwhitehere/acme-config) to pull environment variables to be used in the deployment
-* Using `aps-prefect-deploy` command that relies on static config file read by [`PrefectDeployInfoPrep`](../developer/api-reference.md#acme_portal_sdk.prefect.flow_deploy.PrefectDeployInfoPrep) to specify per flow deployment config.
-
-```python
-# .acme-portal-sdk/flow_deploy.py
-from acme_portal_sdk.github.github_workflow import GithubActionsDeployWorkflow
-
-deploy = GithubActionsDeployWorkflow(workflow_file="deploy.yml")
-```
-
-### `deployment_promote.py`
-
-Is similar to using `deploy.yml` with the same GitHub Environment re-used by this workflow.
-
-```python
-# .acme-portal-sdk/deployment_promote.py
-from acme_portal_sdk.github.github_workflow import GithubActionsPromoteWorkflow
-
-promote = GithubActionsPromoteWorkflow(workflow_file="promote.yml")
-```
-
-### `static_flow_deploy_config.yaml`
-
-Will be read by [`PrefectDeployInfoPrep`](../developer/api-reference.md#acme_portal_sdk.prefect.flow_deploy.PrefectDeployInfoPrep) used by `aps-prefect-deploy` command that is called from `deploy.yml` and `promote.yml` via `aps-prefect-deploy` call. It allows to define static deployment configuration that varies by deployed flow.
-
-```yaml
-hello_world:
-    name: hello_world
-    import_path: acme_prefect.flows.hello_world:hello_world
-    cron: "0 12 * * 1-5"
-    description: Hello World
-    work_pool_name: ecs-pool
-```
+* **Prefect**: See the [Prefect Support](prefect.md) documentation for details on using the built-in Prefect implementations
+* **Airflow**: See the [Airflow Support](airflow.md) documentation for details on using the built-in Airflow implementations
+* **GitHub Workflows**: See the [GitHub Workflows Guide](github-workflows.md) for using GitHub Actions as a deployment provider
 
 ## Creating Custom Workflow Implementations
 
-Both [`DeployWorkflow`](../developer/api-reference.md#acme_portal_sdk.flow_deploy.DeployWorkflow) and [`PromoteWorkflow`](../developer/api-reference.md#acme_portal_sdk.deployment_promote.PromoteWorkflow) use flexible signatures (`*args, **kwargs`) allowing custom implementations to accept additional parameters beyond the standard ones.
+The SDK provides base classes that you can extend to create custom implementations for your specific needs. Each base class can be configured using subclasses that implement sample functionality and return custom data.
 
-### Basic Usage
+### Overview of Base Classes
+
+The SDK defines four main base classes that need to be implemented:
+
+* [`FlowFinder`](../developer/api-reference.md#acme_portal_sdk.flow_finder.FlowFinder) - Discovers flows in your codebase
+* [`DeploymentFinder`](../developer/api-reference.md#acme_portal_sdk.deployment_finder.DeploymentFinder) - Finds existing deployments
+* [`DeployWorkflow`](../developer/api-reference.md#acme_portal_sdk.flow_deploy.DeployWorkflow) - Handles flow deployment operations
+* [`PromoteWorkflow`](../developer/api-reference.md#acme_portal_sdk.deployment_promote.PromoteWorkflow) - Manages deployment promotion between environments
+
+### Custom FlowFinder Implementation
+
+Create a custom `FlowFinder` subclass with an extended `FlowDetails` class to add additional flow metadata:
+
 ```python
-# Standard calls work with any implementation
-deploy_workflow.run(["flow1", "flow2"], "main")
-promote_workflow.run(["flow1"], "dev", "prod", "main")
+# .acme-portal-sdk/flow_finder.py
+from dataclasses import dataclass
+from typing import List
+from acme_portal_sdk.flow_finder import FlowFinder, FlowDetails
+
+@dataclass
+class CustomFlowDetails(FlowDetails):
+    """Extended FlowDetails with custom attributes for priority and category."""
+    
+    def __init__(self, priority: int = 0, category: str = "default", **kwargs):
+        # Extract and set custom attributes
+        child_attributes = kwargs.pop('child_attributes', {})
+        child_attributes.update({
+            "priority": priority,
+            "category": category
+        })
+        super().__init__(child_attributes=child_attributes, **kwargs)
+
+class CustomFlowFinder(FlowFinder):
+    """Custom flow finder that discovers flows with priority and category metadata."""
+    
+    def find_flows(self) -> List[CustomFlowDetails]:
+        # Sample implementation that returns flows with custom metadata
+        flows = []
+        
+        # Example: discover critical batch processing flows
+        flows.append(CustomFlowDetails(
+            name="data_ingestion",
+            original_name="data-ingestion",
+            description="Daily data ingestion pipeline",
+            obj_type="function",
+            obj_name="run_data_ingestion",
+            obj_parent_type="module",
+            obj_parent="pipelines.ingestion",
+            id="flow_001",
+            module="pipelines.ingestion",
+            source_path="/src/pipelines/ingestion.py",
+            source_relative="pipelines/ingestion.py",
+            import_path="pipelines.ingestion",
+            grouping=["data", "batch"],
+            priority=10,  # High priority
+            category="critical"
+        ))
+        
+        # Example: discover standard processing flows
+        flows.append(CustomFlowDetails(
+            name="data_transformation",
+            original_name="data-transformation",
+            description="Transform raw data into analytics format",
+            obj_type="function",
+            obj_name="transform_data",
+            obj_parent_type="module",
+            obj_parent="pipelines.transform",
+            id="flow_002",
+            module="pipelines.transform",
+            source_path="/src/pipelines/transform.py",
+            source_relative="pipelines/transform.py",
+            import_path="pipelines.transform",
+            grouping=["data", "processing"],
+            priority=5,  # Medium priority
+            category="standard"
+        ))
+        
+        return flows
+
+# Create the instance
+flow_finder = CustomFlowFinder()
 ```
 
-### Custom Implementation Example
+### Custom DeploymentFinder Implementation
+
+Create a custom `DeploymentFinder` subclass with an extended `DeploymentDetails` class to add deployment-specific metadata:
+
 ```python
+# .acme-portal-sdk/deployment_finder.py
+from dataclasses import dataclass
+from typing import List
+from acme_portal_sdk.deployment_finder import DeploymentFinder, DeploymentDetails
+
+@dataclass
+class CustomDeploymentDetails(DeploymentDetails):
+    """Extended DeploymentDetails with custom attributes for resource limits and region."""
+    
+    def __init__(self, region: str = "us-east-1", cpu_limit: str = "1000m", **kwargs):
+        # Extract and set custom attributes
+        child_attributes = kwargs.pop('child_attributes', {})
+        child_attributes.update({
+            "region": region,
+            "cpu_limit": cpu_limit
+        })
+        super().__init__(child_attributes=child_attributes, **kwargs)
+
+class CustomDeploymentFinder(DeploymentFinder):
+    """Custom deployment finder that discovers deployments with resource and region metadata."""
+    
+    def get_deployments(self, project_name: str, branch_name: str, env: str) -> List[CustomDeploymentDetails]:
+        # Sample implementation that returns deployments with custom metadata
+        deployments = []
+        
+        # Example: production deployment with high resources
+        deployments.append(CustomDeploymentDetails(
+            name=f"{project_name}--{branch_name}--data_ingestion--{env}",
+            project_name=project_name,
+            branch=branch_name,
+            flow_name="data_ingestion",
+            env=env,
+            commit_hash="abc123def456",
+            package_version="1.2.3",
+            tags=["production", "critical"],
+            id="deploy_001",
+            created_at="2024-01-15T10:30:00Z",
+            updated_at="2024-01-15T14:20:00Z",
+            flow_id="flow_001",
+            url="https://deployment-system.com/deployments/deploy_001",
+            region="us-west-2",  # Custom region
+            cpu_limit="4000m"    # High CPU limit for production
+        ))
+        
+        # Example: development deployment with standard resources
+        if env == "dev":
+            deployments.append(CustomDeploymentDetails(
+                name=f"{project_name}--{branch_name}--data_transformation--{env}",
+                project_name=project_name,
+                branch=branch_name,
+                flow_name="data_transformation",
+                env=env,
+                commit_hash="def456ghi789",
+                package_version="1.2.4-dev",
+                tags=["development", "testing"],
+                id="deploy_002",
+                created_at="2024-01-16T08:15:00Z",
+                updated_at="2024-01-16T09:45:00Z",
+                flow_id="flow_002",
+                url="https://deployment-system.com/deployments/deploy_002",
+                region="us-east-1",  # Standard region for dev
+                cpu_limit="1000m"    # Lower CPU limit for dev
+            ))
+        
+        return deployments
+
+# Create the instance
+deployment_finder = CustomDeploymentFinder()
+```
+
+### Custom DeployWorkflow Implementation
+
+Both [`DeployWorkflow`](../developer/api-reference.md#acme_portal_sdk.flow_deploy.DeployWorkflow) and [`PromoteWorkflow`](../developer/api-reference.md#acme_portal_sdk.deployment_promote.PromoteWorkflow) use flexible signatures (`*args, **kwargs`) allowing custom implementations to accept additional parameters beyond the standard ones.
+
+```python
+# .acme-portal-sdk/flow_deploy.py
+from typing import Optional, Dict, Any, List
 from acme_portal_sdk.flow_deploy import DeployWorkflow
 
 class CustomDeployWorkflow(DeployWorkflow):
-    def run(self, *args, **kwargs):
+    """Custom deployment workflow with environment-specific configuration and notifications."""
+    
+    def __init__(self, notification_webhook: Optional[str] = None):
+        self.notification_webhook = notification_webhook
+    
+    def run(self, *args, **kwargs) -> Optional[str]:
+        # Extract standard parameters with flexible argument handling
         flows = kwargs.get('flows_to_deploy', args[0] if args else [])
         ref = kwargs.get('ref', args[1] if len(args) > 1 else 'main')
         
         # Accept custom parameters
         environment = kwargs.get('environment', 'dev')
         config = kwargs.get('deployment_config', {})
+        dry_run = kwargs.get('dry_run', False)
+        notification_channels = kwargs.get('notification_channels', [])
         
-        # Your deployment logic here
-        return self.execute_deployment(flows, ref, environment, config)
+        # Sample deployment logic with custom functionality
+        deployment_id = f"deploy_{hash(f'{flows}_{ref}_{environment}')}"
+        
+        print(f"Starting deployment {deployment_id}")
+        print(f"  Flows: {flows}")
+        print(f"  Reference: {ref}")
+        print(f"  Environment: {environment}")
+        print(f"  Configuration: {config}")
+        
+        if dry_run:
+            print("  DRY RUN - No actual deployment performed")
+            return f"dry_run_{deployment_id}"
+        
+        # Simulate environment-specific deployment steps
+        if environment == "prod":
+            print("  Performing production deployment with safety checks...")
+            # Add production-specific logic like approval workflows
+            self._validate_production_deployment(flows, config)
+        else:
+            print(f"  Performing {environment} deployment...")
+        
+        # Send notifications if configured
+        if notification_channels:
+            self._send_notifications(notification_channels, deployment_id, flows, environment)
+        
+        print(f"  Deployment {deployment_id} completed successfully")
+        return deployment_id
+    
+    def _validate_production_deployment(self, flows: List[str], config: Dict[str, Any]):
+        """Additional validation for production deployments."""
+        required_config = ["resource_limits", "health_checks", "rollback_strategy"]
+        missing = [key for key in required_config if key not in config]
+        if missing:
+            raise ValueError(f"Production deployment requires: {missing}")
+    
+    def _send_notifications(self, channels: List[str], deployment_id: str, flows: List[str], environment: str):
+        """Send deployment notifications to specified channels."""
+        message = f"Deployment {deployment_id} completed for flows {flows} in {environment}"
+        for channel in channels:
+            print(f"  Notification sent to {channel}: {message}")
+
+# Create the instance
+deploy = CustomDeployWorkflow(notification_webhook="https://hooks.slack.com/...")
 ```
 
-### Extended Usage
+### Custom PromoteWorkflow Implementation
+
+```python
+# .acme-portal-sdk/deployment_promote.py
+from typing import Optional, List, Dict, Any
+from acme_portal_sdk.deployment_promote import PromoteWorkflow
+
+class CustomPromoteWorkflow(PromoteWorkflow):
+    """Custom promotion workflow with approval gates and validation."""
+    
+    def __init__(self, require_approval: bool = True):
+        self.require_approval = require_approval
+    
+    def run(self, *args, **kwargs) -> Optional[str]:
+        # Extract standard parameters with flexible argument handling
+        flows = kwargs.get('flows_to_deploy', args[0] if args else [])
+        source_env = kwargs.get('source_env', args[1] if len(args) > 1 else 'dev')
+        target_env = kwargs.get('target_env', args[2] if len(args) > 2 else 'prod')
+        ref = kwargs.get('ref', args[3] if len(args) > 3 else 'main')
+        
+        # Accept custom parameters
+        project_name = kwargs.get('project_name', 'default-project')
+        branch_name = kwargs.get('branch_name', 'main')
+        auto_approve = kwargs.get('auto_approve', False)
+        validation_rules = kwargs.get('validation_rules', [])
+        
+        # Sample promotion logic with custom functionality
+        promotion_id = f"promote_{hash(f'{flows}_{source_env}_{target_env}_{ref}')}"
+        
+        print(f"Starting promotion {promotion_id}")
+        print(f"  Flows: {flows}")
+        print(f"  Source Environment: {source_env}")
+        print(f"  Target Environment: {target_env}")
+        print(f"  Reference: {ref}")
+        print(f"  Project: {project_name}")
+        
+        # Run custom validation rules
+        if validation_rules:
+            print("  Running validation rules...")
+            for rule in validation_rules:
+                self._run_validation_rule(rule, flows, source_env, target_env)
+        
+        # Handle approval requirements
+        if self.require_approval and not auto_approve:
+            approval_status = self._request_approval(promotion_id, flows, source_env, target_env)
+            if not approval_status:
+                print(f"  Promotion {promotion_id} rejected or timed out")
+                return None
+        
+        # Simulate promotion steps
+        print("  Extracting source deployment configuration...")
+        source_config = self._get_source_deployment_config(flows, source_env)
+        
+        print("  Applying target environment settings...")
+        target_config = self._apply_target_environment_settings(source_config, target_env)
+        
+        print("  Creating target deployments...")
+        # Simulate deployment creation
+        for flow in flows:
+            print(f"    Creating deployment for {flow} in {target_env}")
+        
+        print(f"  Promotion {promotion_id} completed successfully")
+        return promotion_id
+    
+    def _run_validation_rule(self, rule: str, flows: List[str], source_env: str, target_env: str):
+        """Run a custom validation rule."""
+        print(f"    Validating rule: {rule}")
+        # Example validation logic
+        if rule == "security_scan" and target_env == "prod":
+            print("      Security scan passed")
+        elif rule == "performance_test":
+            print("      Performance test passed")
+    
+    def _request_approval(self, promotion_id: str, flows: List[str], source_env: str, target_env: str) -> bool:
+        """Request approval for the promotion (simulated)."""
+        print(f"    Approval requested for promotion from {source_env} to {target_env}")
+        print(f"    Flows requiring approval: {flows}")
+        # Simulate approval (in real implementation, this would integrate with approval systems)
+        return True
+    
+    def _get_source_deployment_config(self, flows: List[str], source_env: str) -> Dict[str, Any]:
+        """Extract configuration from source deployments."""
+        return {
+            "version": "1.2.3",
+            "commit_hash": "abc123def456",
+            "resource_limits": {"cpu": "1000m", "memory": "2Gi"},
+            "environment_vars": {"ENV": source_env}
+        }
+    
+    def _apply_target_environment_settings(self, source_config: Dict[str, Any], target_env: str) -> Dict[str, Any]:
+        """Apply target environment specific settings."""
+        config = source_config.copy()
+        config["environment_vars"]["ENV"] = target_env
+        
+        # Apply environment-specific resource scaling
+        if target_env == "prod":
+            config["resource_limits"]["cpu"] = "4000m"
+            config["resource_limits"]["memory"] = "8Gi"
+        
+        return config
+
+# Create the instance
+promote = CustomPromoteWorkflow(require_approval=True)
+```
+
+### Usage Examples
+
+#### Basic Usage
+```python
+# Standard calls work with any implementation
+deploy_workflow.run(["flow1", "flow2"], "main")
+promote_workflow.run(["flow1"], "dev", "prod", "main")
+```
+
+#### Extended Usage with Custom Parameters
 ```python
 # Use additional parameters as needed
 deploy_workflow.run(
-    flows_to_deploy=["service1", "service2"],
+    flows_to_deploy=["data_ingestion", "data_transformation"],
     ref="main",
     environment="staging",
-    deployment_config={"replicas": 3}
+    deployment_config={
+        "resource_limits": {"cpu": "2000m", "memory": "4Gi"},
+        "health_checks": {"enabled": True, "timeout": 30},
+        "rollback_strategy": "automatic"
+    },
+    dry_run=False,
+    notification_channels=["slack", "email"]
+)
+
+promote_workflow.run(
+    flows_to_deploy=["data_ingestion"],
+    source_env="staging",
+    target_env="prod",
+    ref="v1.2.3",
+    project_name="analytics-platform",
+    branch_name="main",
+    auto_approve=False,
+    validation_rules=["security_scan", "performance_test"]
 )
 ```
 

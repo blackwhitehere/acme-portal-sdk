@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Release Notes Process**: Standardized release notes workflow with automated validation and extraction (#17)
 - **Automated CHANGELOG.md Updates**: Release workflow now automatically updates CHANGELOG.md after publishing by moving [Unreleased] content to versioned sections (#17)
 
+### Changed
+- **Documentation Reorganization**: Moved Prefect implementation details from user guides to dedicated Prefect page for better organization (#22)
+- **Enhanced Custom Implementation Guide**: Expanded "Creating Custom Workflow Implementations" section to include comprehensive examples for all four base classes (FlowFinder, DeploymentFinder, DeployWorkflow, PromoteWorkflow) with sample data and functionality (#22)
+
 ## Historical Releases
 
 *Historical versions before release notes standardization. See git history for detailed changes.*
