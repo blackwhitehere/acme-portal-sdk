@@ -230,3 +230,142 @@ class TestFlowDetails:
         # Custom attributes should not be in the main dictionary
         assert "priority" not in data
         assert "category" not in data
+
+    def test_line_number_field(self):
+        """Test that line_number field works correctly."""
+        # Test with line number
+        flow_with_line = FlowDetails(
+            name="test_flow",
+            original_name="test-flow",
+            description="Test flow description",
+            obj_type="function",
+            obj_name="test_func",
+            obj_parent_type="module",
+            obj_parent="test_module",
+            id="test_id",
+            module="test_module",
+            source_path="/path/to/source.py",
+            source_relative="relative/path.py",
+            import_path="test_module.source",
+            line_number=42,
+            grouping=["group1", "group2"],
+        )
+        
+        assert flow_with_line.line_number == 42
+        
+        # Test without line number (should default to None)
+        flow_without_line = FlowDetails(
+            name="test_flow",
+            original_name="test-flow",
+            description="Test flow description",
+            obj_type="function",
+            obj_name="test_func",
+            obj_parent_type="module",
+            obj_parent="test_module",
+            id="test_id",
+            module="test_module",
+            source_path="/path/to/source.py",
+            source_relative="relative/path.py",
+            import_path="test_module.source",
+            grouping=["group1", "group2"],
+        )
+        
+        assert flow_without_line.line_number is None
+
+    def test_line_number_serialization(self):
+        """Test that line_number field is properly serialized and deserialized."""
+        # Test with line number
+        original_flow = FlowDetails(
+            name="test_flow",
+            original_name="test-flow",
+            description="Test flow description",
+            obj_type="function",
+            obj_name="test_func",
+            obj_parent_type="module",
+            obj_parent="test_module",
+            id="test_id",
+            module="test_module",
+            source_path="/path/to/source.py",
+            source_relative="relative/path.py",
+            import_path="test_module.source",
+            line_number=123,
+            grouping=["group1", "group2"],
+        )
+        
+        # Serialize to dict
+        data = original_flow.to_dict()
+        assert "line_number" in data
+        assert data["line_number"] == 123
+        
+        # Deserialize from dict
+        reconstructed_flow = FlowDetails.from_dict(data)
+        assert reconstructed_flow.line_number == 123
+        
+        # Test without line number
+        flow_without_line = FlowDetails(
+            name="test_flow2",
+            original_name="test-flow2",
+            description="Test flow description",
+            obj_type="function",
+            obj_name="test_func2",
+            obj_parent_type="module",
+            obj_parent="test_module",
+            id="test_id2",
+            module="test_module",
+            source_path="/path/to/source.py",
+            source_relative="relative/path.py",
+            import_path="test_module.source",
+            grouping=["group1", "group2"],
+        )
+        
+        # Serialize to dict
+        data_no_line = flow_without_line.to_dict()
+        assert "line_number" in data_no_line
+        assert data_no_line["line_number"] is None
+        
+        # Deserialize from dict
+        reconstructed_no_line = FlowDetails.from_dict(data_no_line)
+        assert reconstructed_no_line.line_number is None
+
+    def test_from_dict_with_line_number(self):
+        """Test from_dict() when line_number is provided in data."""
+        data = {
+            "name": "test_flow",
+            "original_name": "test-flow",
+            "description": "Test flow description",
+            "obj_type": "function",
+            "obj_name": "test_func",
+            "obj_parent_type": "module",
+            "obj_parent": "test_module",
+            "id": "test_id",
+            "module": "test_module",
+            "source_path": "/path/to/source.py",
+            "source_relative": "relative/path.py",
+            "import_path": "test_module.source",
+            "line_number": 999,
+            "grouping": ["group1", "group2"],
+        }
+        
+        flow = FlowDetails.from_dict(data)
+        assert flow.line_number == 999
+
+    def test_from_dict_without_line_number(self):
+        """Test from_dict() when line_number is not provided in data."""
+        data = {
+            "name": "test_flow",
+            "original_name": "test-flow",
+            "description": "Test flow description",
+            "obj_type": "function",
+            "obj_name": "test_func",
+            "obj_parent_type": "module",
+            "obj_parent": "test_module",
+            "id": "test_id",
+            "module": "test_module",
+            "source_path": "/path/to/source.py",
+            "source_relative": "relative/path.py",
+            "import_path": "test_module.source",
+            "grouping": ["group1", "group2"],
+        }
+        
+        flow = FlowDetails.from_dict(data)
+        assert flow.line_number is None
