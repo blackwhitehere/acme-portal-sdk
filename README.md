@@ -2,49 +2,245 @@
 
 > **Important:** This SDK is currently in alpha and primarily for demonstration purposes. APIs may still change frequently.
 
-SDK to provide data and actions for `acme-portal` `VSCode` [extension](https://github.com/blackwhitehere/acme-portal).
+## Overview
 
-Rather than embedding a pre-defined logic in `acme-portal` extension, the SDK
-allows to define sources of data and behaviour for extension functionality. As such, the extension servers as UI layer to the implementation provided by SDK objects.
+**acme-portal-sdk** is a Python SDK that provides data and actions for the `acme-portal` VSCode [extension](https://github.com/blackwhitehere/acme-portal). It standardizes the deployment workflow for Python applications that implement "flows" (Jobs/DAGs/Workflows) while allowing full customization of the underlying implementation.
 
 [AI wiki](https://deepwiki.com/blackwhitehere/acme-portal-sdk/)
 
-## Problem
+### Main Idea
 
-A repeatable source of pain while working on software is that deployment processes are highly specific to a given project. While the application may be written in a well known language or framework, the deployment process is usually specialized to a given application, team and company making it difficult for new and existing team members to understand how to just "ship" their code.
+Rather than embedding pre-defined deployment logic in the VSCode extension, the SDK allows you to define custom sources of data and behavior. The extension serves as a UI layer to your SDK implementations, providing a consistent interface for:
 
-`acme-portal` and `acme-portal-sdk` attempt to address that problem by proposing a standard UI & workflow of deploying a python application.
-However, rather than dictating an exact deployment implementation, the two packages jointly define only high level deployment concepts and allow users to customize the implementation.
+- **Discovering flows** in your codebase
+- **Managing deployments** across environments 
+- **Promoting deployments** between environments (dev → staging → prod)
 
-In a way, they attempt to make the deployment process as frictionless and intuitive as possible, without simplifying the deployment to a restrained set of practices.
+The SDK defines abstract interfaces that you implement according to your project's needs, whether using Prefect, Airflow, GitHub Actions, or custom deployment systems.
 
-`acme-portal-sdk` contains abstract interfaces expected by the `VSCode` `acme-portal` extension. It also contains a specific implementation for a python application based on the `prefect` orchestration library. Users of the SDK can easily extend the abstract interfaces to their projects. Some standard implementation schemes like one based on e.g. `airflow` can be made part of SDK in the future.
+## Quick Start
 
-## Concepts
+To set up your project with acme-portal-sdk, create a `.acme_portal_sdk` directory in your project root with these files:
 
-To the end of clarifying deployment process, the SDK defines the following concepts:
+### 1. Install the SDK
 
-* `Flow` - (often named in various frameworks as `Workflow` / `Job` / `DAG`) is a unit of work in an application. It can also be though of as an `executable script` or `entrypoint`. A `Flow` can have sub-elements like `Steps` / `Tasks` / `Nodes`, but those are not tracked by the SDK. Flows form a basis of what unit of computation is deployed. In this way an application is composed of multiple related `Flows` maintained by the team, with a desire to deploy them independently of each other.
-* `Deployment` - is a piece of configuration defined in an execution environment (e.g. `Prefect`/`Airflow` Server, a remote server, some AWS Resources) that defines how to run a unit of work (a `Flow`). `Deployment` is then capable of orchestrating physical resources (by e.g. submitting requests, having execute permissions) and generally use environment resources to perform computation.
-* `Environment` - (sometimes called `Namespace`, `Version`, `Label`) is a persistent identifier of an application version run in a given `Deployment`. Popular `Environment` names used are `dev`, `tst`, `uat`, `prod`. Environment names are useful to communicate release state of a given feature (and its code changes) in an application release cycle. They give meaning to statements like "those changes are in `dev` only", "this feature needs to be tested in `uat`", etc.
+```bash
+pip install acme_portal_sdk
+```
 
-Having those concepts defined the SDK defines the following actions:
+### 2. Create SDK Configuration Files
 
-* `Find Flows` - scan code or configration to find `Flows` which can be deployed
-* `Find Deployments` - find existing `Flow` deployment information 
-* `Deploy` - uses information about the `Flow` together with additional deployment configuration to create a `Deployment` in an initial, starting environment (e.g. `dev`).
-* `Promote` - having completed required validation steps on deployment outputs in a given environment, the code version used in source `Deployment` can be deployed to a target environment (e.g. from `dev` to `uat`)
+```bash
+mkdir .acme_portal_sdk
+```
 
-The `acme-portal` VSCode extension then displays flow and deployment infromation and provides UI elements (buttons, forms) / VSCode tasks to trigger `Deploy` and `Promote` actions.
+#### `.acme_portal_sdk/flow_finder.py`
+```python
+from acme_portal_sdk.flow_finder import FlowFinder, FlowDetails
+from pathlib import Path
+from typing import List
+import ast
+import os
 
-The SDK and `acme-portal` are intended to complement use of CICD pipelines in cases where deployments can not be fully automated.
+class MyCustomFlowFinder(FlowFinder):
+    """Custom implementation to find flows in your codebase."""
+    
+    def __init__(self, root_dir: str):
+        self.root_dir = Path(root_dir)
+    
+    def find_flows(self) -> List[FlowDetails]:
+        """Find flows by scanning Python files for flow decorators."""
+        flows = []
+        
+        for py_file in self.root_dir.rglob("*.py"):
+            if py_file.is_file():
+                try:
+                    with open(py_file, 'r') as f:
+                        tree = ast.parse(f.read())
+                    
+                    for node in ast.walk(tree):
+                        if isinstance(node, ast.FunctionDef):
+                            # Look for @flow decorator or similar patterns
+                            for decorator in node.decorator_list:
+                                if isinstance(decorator, ast.Name) and decorator.id == 'flow':
+                                    flows.append(FlowDetails(
+                                        name=node.name,
+                                        original_name=node.name,
+                                        description=ast.get_docstring(node) or "",
+                                        obj_type="function",
+                                        obj_name=node.name,
+                                        obj_parent_type="module",
+                                        obj_parent=py_file.stem,
+                                        id=f"{py_file.stem}.{node.name}",
+                                        module=py_file.stem,
+                                        source_path=str(py_file),
+                                        source_relative=str(py_file.relative_to(self.root_dir)),
+                                        import_path=f"{py_file.stem}",
+                                        grouping=[py_file.parent.name]
+                                    ))
+                except Exception:
+                    continue
+        
+        return flows
 
-For explanation on how to configure your project to work with `acme-portal` using the SDK, checkout [Configuring SDK for your project](user/user-guides.md#configuring-sdk-for-your-project)
+# Create an instance to find flows in your project
+project_root = Path(__file__).parent.parent
+flow_finder = MyCustomFlowFinder(
+    root_dir=str(project_root / "src" / "your_project_name")
+)
+```
 
-For explanation of the features provided by default `prefect` based implementation checkout [Default functionality of prefect based implementation](user/prefect.md#default-functionality-of-prefect-based-implementation)
+#### `.acme_portal_sdk/deployment_finder.py`
+```python
+from acme_portal_sdk.deployment_finder import DeploymentFinder, DeploymentDetails
+from typing import List
+import requests
 
-See guide [Using default Prefect based functionality](user/prefect.md#using-default-prefect-based-functionality) for how to configure your project to work with `acme-portal` using the default `prefect` based implementation. You can view a sample project using it under [`acme-prefect`](https://github.com/blackwhitehere/acme-prefect).
+class MyCustomDeploymentFinder(DeploymentFinder):
+    """Custom implementation to find existing deployments."""
+    
+    def __init__(self, api_base_url: str = "https://your-deployment-api.com"):
+        self.api_base_url = api_base_url
+    
+    def get_deployments(self) -> List[DeploymentDetails]:
+        """Fetch deployments from your deployment API."""
+        try:
+            response = requests.get(f"{self.api_base_url}/deployments")
+            response.raise_for_status()
+            
+            deployments = []
+            for data in response.json():
+                deployments.append(DeploymentDetails(
+                    name=data["name"],
+                    project_name=data["project"],
+                    branch=data["branch"],
+                    flow_name=data["flow_name"],
+                    env=data["environment"],
+                    commit_hash=data["commit_hash"],
+                    package_version=data.get("version", "unknown"),
+                    tags=data.get("tags", []),
+                    id=data["id"],
+                    created_at=data["created_at"],
+                    updated_at=data["updated_at"],
+                    flow_id=data["flow_id"],
+                    url=data["url"]
+                ))
+            
+            return deployments
+        except Exception:
+            return []
+
+# Find existing deployments from your API
+deployment_finder = MyCustomDeploymentFinder()
+```
+
+#### `.acme_portal_sdk/flow_deploy.py`
+```python
+from acme_portal_sdk.flow_deploy import DeployWorkflow
+from typing import Any, Optional
+import subprocess
+
+class MyCustomDeployWorkflow(DeployWorkflow):
+    """Custom implementation for deploying flows."""
+    
+    def __init__(self, deploy_script: str = "scripts/deploy.sh"):
+        self.deploy_script = deploy_script
+    
+    def run(self, *args: Any, **kwargs: Any) -> Optional[str]:
+        """Deploy flows using custom deployment script."""
+        try:
+            flows_to_deploy = kwargs.get("flows_to_deploy", [])
+            env = kwargs.get("env", "dev")
+            branch_name = kwargs.get("branch_name", "main")
+            
+            # Build deployment command
+            cmd = [
+                "bash", self.deploy_script,
+                "--flows", ",".join(flows_to_deploy),
+                "--env", env,
+                "--branch", branch_name
+            ]
+            
+            # Execute deployment
+            result = subprocess.run(cmd, capture_output=True, text=True)
+            
+            if result.returncode == 0:
+                # Return deployment URL if available in output
+                return result.stdout.strip()
+            else:
+                print(f"Deployment failed: {result.stderr}")
+                return None
+                
+        except Exception as e:
+            print(f"Deployment error: {e}")
+            return None
+
+# Deploy flows using custom script
+deploy = MyCustomDeployWorkflow(deploy_script="scripts/deploy.sh")
+```
+
+#### `.acme_portal_sdk/deployment_promote.py`
+```python
+from acme_portal_sdk.deployment_promote import PromoteWorkflow
+from typing import Any, Optional
+import subprocess
+
+class MyCustomPromoteWorkflow(PromoteWorkflow):
+    """Custom implementation for promoting deployments between environments."""
+    
+    def __init__(self, promote_script: str = "scripts/promote.sh"):
+        self.promote_script = promote_script
+    
+    def run(self, *args: Any, **kwargs: Any) -> Optional[str]:
+        """Promote deployments using custom promotion script."""
+        try:
+            flows_to_deploy = kwargs.get("flows_to_deploy", [])
+            source_env = kwargs.get("source_env", "dev")
+            target_env = kwargs.get("target_env", "prod")
+            project_name = kwargs.get("project_name", "")
+            
+            # Build promotion command
+            cmd = [
+                "bash", self.promote_script,
+                "--flows", ",".join(flows_to_deploy),
+                "--from", source_env,
+                "--to", target_env,
+                "--project", project_name
+            ]
+            
+            # Execute promotion
+            result = subprocess.run(cmd, capture_output=True, text=True)
+            
+            if result.returncode == 0:
+                # Return promotion URL if available in output
+                return result.stdout.strip()
+            else:
+                print(f"Promotion failed: {result.stderr}")
+                return None
+                
+        except Exception as e:
+            print(f"Promotion error: {e}")
+            return None
+
+# Promote deployments using custom script
+promote = MyCustomPromoteWorkflow(promote_script="scripts/promote.sh")
+```
+
+### 3. Install VSCode Extension
+
+Install the [`acme-portal` VSCode extension](https://github.com/blackwhitehere/acme-portal) to get the UI interface for managing your flows and deployments.
+
+## Documentation
+
+- **[Core Concepts](docs/docs/user/concepts.md)** - Understanding flows, deployments, and environments
+- **[User Guides](docs/docs/user/user-guides.md)** - Detailed configuration examples
+- **[Features](docs/docs/user/features.md)** - Available functionality and platform support
+- **[API Reference](docs/docs/developer/api-reference.md)** - Complete API documentation
+
+### Example Projects
+
+- **[acme-prefect](https://github.com/blackwhitehere/acme-prefect)** - Complete example using Prefect workflows
 
 ## Development
 
-For detailed development setup, contribution guidelines, and release notes process, see [docs/docs/developer/contributing.md](docs/docs/developer/contributing.md).
+For detailed development setup, contribution guidelines, and release notes process, see [CONTRIBUTING.md](CONTRIBUTING.md).

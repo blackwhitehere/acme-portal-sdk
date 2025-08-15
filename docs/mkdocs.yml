@@ -44,6 +44,7 @@ theme:
 nav:
   - User:
     - Introduction: index.md
+    - Core Concepts: user/concepts.md
     - Features: user/features.md
     - Installation: user/install.md
     - Getting Started: user/getting-started.md
