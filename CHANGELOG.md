@@ -8,6 +8,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **PrefectFlowAttributes Dataclass**: Created structured dataclass for Prefect-specific flow attributes with comprehensive documentation of each field (#27)
+- **API Changes Documentation**: Added comprehensive section explaining FlowDetails v1.0.0 architectural changes, benefits, and impact (#27)
+
+### Changed
+- **Documentation Simplification**: Removed CustomFlowDetails and CustomDeploymentDetails examples from user guides, replaced with simpler implementations using base classes with child_attributes (#27)
+
+## [1.0.0] - 2025-01-21
+
+### Changed
+- **BREAKING: FlowDetails API Simplification**: Removed `obj_type`, `obj_name`, `obj_parent_type`, `obj_parent`, `module`, and `import_path` as required attributes from FlowDetails base class. These implementation-specific attributes are now stored in `child_attributes` for Prefect and Airflow implementations. This allows for a more flexible base class while maintaining backward compatibility for specific implementations. See migration guide in user documentation for details (#27)
+
+### Added
 - **Line Number Property**: Added `line_number` field to FlowDetails for editor integration to open source files at specific line numbers (#25)
 - **Release Notes Process**: Standardized release notes workflow with automated validation and extraction (#17)
 - **Automated CHANGELOG.md Updates**: Release workflow now automatically updates CHANGELOG.md after publishing by moving [Unreleased] content to versioned sections (#17)

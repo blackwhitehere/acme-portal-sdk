@@ -189,7 +189,7 @@ class PrefectDeployInfoPrep(DeployInfoPrep):
 
             # Import the flow function
             flow_function = self._import_function(
-                flow_info.import_path, flow_info.obj_name
+                flow_info.child_attributes["import_path"], flow_info.child_attributes["obj_name"]
             )
 
             # Standardize flow name if needed

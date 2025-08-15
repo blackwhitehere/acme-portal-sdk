@@ -49,6 +49,7 @@ nav:
     - Installation: user/install.md
     - Getting Started: user/getting-started.md
     - User Guides: user/user-guides.md
+    - API Migration Guide: user/api-migration-guide.md
     - Prefect Support: user/prefect.md
     - Airflow Support: user/airflow.md
     - Cheat Sheet: user/cheat-sheet.md

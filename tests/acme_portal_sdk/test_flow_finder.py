@@ -10,15 +10,9 @@ class TestFlowDetails:
             name="test_flow",
             original_name="test-flow",
             description="Test flow description",
-            obj_type="function",
-            obj_name="test_func",
-            obj_parent_type="module",
-            obj_parent="test_module",
             id="test_id",
-            module="test_module",
             source_path="/path/to/source.py",
             source_relative="relative/path.py",
-            import_path="test_module.source",
             grouping=["group1", "group2"],
         )
         
@@ -27,21 +21,25 @@ class TestFlowDetails:
 
     def test_flow_details_with_child_attributes(self):
         """Test FlowDetails creation with child_attributes."""
-        child_attrs = {"custom_field": "custom_value", "priority": 1}
+        child_attrs = {
+            "custom_field": "custom_value", 
+            "priority": 1,
+            # Prefect-specific attributes that would be set by PrefectFlowFinder
+            "obj_type": "function",
+            "obj_name": "test_func",
+            "obj_parent_type": "module",
+            "obj_parent": "test_module",
+            "module": "test_module",
+            "import_path": "test_module.source"
+        }
         
         flow = FlowDetails(
             name="test_flow",
             original_name="test-flow",
             description="Test flow description",
-            obj_type="function",
-            obj_name="test_func",
-            obj_parent_type="module",
-            obj_parent="test_module",
             id="test_id",
-            module="test_module",
             source_path="/path/to/source.py",
             source_relative="relative/path.py",
-            import_path="test_module.source",
             grouping=["group1", "group2"],
             child_attributes=child_attrs,
         )
@@ -50,21 +48,21 @@ class TestFlowDetails:
 
     def test_to_dict_keeps_child_attributes_separate(self):
         """Test that to_dict() keeps child_attributes as a separate key."""
-        child_attrs = {"custom_field": "custom_value", "priority": 1}
+        child_attrs = {
+            "custom_field": "custom_value", 
+            "priority": 1,
+            "obj_type": "function",
+            "obj_name": "test_func",
+            "module": "test_module"
+        }
         
         flow = FlowDetails(
             name="test_flow",
             original_name="test-flow",
             description="Test flow description",
-            obj_type="function",
-            obj_name="test_func",
-            obj_parent_type="module",
-            obj_parent="test_module",
             id="test_id",
-            module="test_module",
             source_path="/path/to/source.py",
             source_relative="relative/path.py",
-            import_path="test_module.source",
             grouping=["group1", "group2"],
             child_attributes=child_attrs,
         )
@@ -79,6 +77,9 @@ class TestFlowDetails:
         # Custom attributes should not be merged into the main dictionary
         assert "custom_field" not in result
         assert "priority" not in result
+        assert "obj_type" not in result
+        assert "obj_name" not in result
+        assert "module" not in result
 
     def test_to_dict_with_empty_child_attributes(self):
         """Test that to_dict() includes child_attributes even when empty."""
@@ -86,15 +87,9 @@ class TestFlowDetails:
             name="test_flow",
             original_name="test-flow",
             description="Test flow description",
-            obj_type="function",
-            obj_name="test_func",
-            obj_parent_type="module",
-            obj_parent="test_module",
             id="test_id",
-            module="test_module",
             source_path="/path/to/source.py",
             source_relative="relative/path.py",
-            import_path="test_module.source",
             grouping=["group1", "group2"],
         )
         
@@ -102,7 +97,7 @@ class TestFlowDetails:
         
         # Should contain all standard fields
         assert result["name"] == "test_flow"
-        assert result["obj_type"] == "function"
+        assert result["description"] == "Test flow description"
         
         # child_attributes key should be present even if empty
         assert "child_attributes" in result
@@ -114,19 +109,16 @@ class TestFlowDetails:
             "name": "test_flow",
             "original_name": "test-flow",
             "description": "Test flow description",
-            "obj_type": "function",
-            "obj_name": "test_func",
-            "obj_parent_type": "module",
-            "obj_parent": "test_module",
             "id": "test_id",
-            "module": "test_module",
             "source_path": "/path/to/source.py",
             "source_relative": "relative/path.py",
-            "import_path": "test_module.source",
             "grouping": ["group1", "group2"],
             "child_attributes": {
                 "custom_field": "custom_value",
                 "priority": 1,
+                "obj_type": "function",
+                "obj_name": "test_func",
+                "module": "test_module",
             }
         }
         
@@ -135,6 +127,7 @@ class TestFlowDetails:
         assert flow.name == "test_flow"
         assert flow.child_attributes["custom_field"] == "custom_value"
         assert flow.child_attributes["priority"] == 1
+        assert flow.child_attributes["obj_type"] == "function"
 
     def test_from_dict_without_child_attributes(self):
         """Test from_dict() when child_attributes is not provided."""
@@ -142,15 +135,9 @@ class TestFlowDetails:
             "name": "test_flow",
             "original_name": "test-flow",
             "description": "Test flow description",
-            "obj_type": "function",
-            "obj_name": "test_func",
-            "obj_parent_type": "module",
-            "obj_parent": "test_module",
             "id": "test_id",
-            "module": "test_module",
             "source_path": "/path/to/source.py",
             "source_relative": "relative/path.py",
-            "import_path": "test_module.source",
             "grouping": ["group1", "group2"],
         }
         
@@ -165,17 +152,17 @@ class TestFlowDetails:
             name="test_flow",
             original_name="test-flow",
             description="Test flow description",
-            obj_type="function",
-            obj_name="test_func",
-            obj_parent_type="module",
-            obj_parent="test_module",
             id="test_id",
-            module="test_module",
             source_path="/path/to/source.py",
             source_relative="relative/path.py",
-            import_path="test_module.source",
             grouping=["group1", "group2"],
-            child_attributes={"custom_field": "custom_value", "priority": 1},
+            child_attributes={
+                "custom_field": "custom_value", 
+                "priority": 1,
+                "obj_type": "function",
+                "obj_name": "test_func",
+                "module": "test_module",
+            },
         )
         
         # Convert to dict and back
@@ -205,15 +192,9 @@ class TestFlowDetails:
             name="test_flow",
             original_name="test-flow",
             description="Test flow description",
-            obj_type="function",
-            obj_name="test_func",
-            obj_parent_type="module",
-            obj_parent="test_module",
             id="test_id",
-            module="test_module",
             source_path="/path/to/source.py",
             source_relative="relative/path.py",
-            import_path="test_module.source",
             grouping=["group1", "group2"],
             priority=5,
             category="important",

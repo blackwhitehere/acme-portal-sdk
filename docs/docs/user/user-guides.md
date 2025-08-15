@@ -41,70 +41,64 @@ The SDK defines four main base classes that need to be implemented:
 
 ### Custom FlowFinder Implementation
 
-Create a custom `FlowFinder` subclass with an extended `FlowDetails` class to add additional flow metadata:
+Create a custom `FlowFinder` subclass to discover flows in your codebase:
 
 ```python
 # .acme-portal-sdk/flow_finder.py
-from dataclasses import dataclass
 from typing import List
 from acme_portal_sdk.flow_finder import FlowFinder, FlowDetails
 
-@dataclass
-class CustomFlowDetails(FlowDetails):
-    """Extended FlowDetails with custom attributes for priority and category."""
-    
-    def __init__(self, priority: int = 0, category: str = "default", **kwargs):
-        # Extract and set custom attributes
-        child_attributes = kwargs.pop('child_attributes', {})
-        child_attributes.update({
-            "priority": priority,
-            "category": category
-        })
-        super().__init__(child_attributes=child_attributes, **kwargs)
-
 class CustomFlowFinder(FlowFinder):
-    """Custom flow finder that discovers flows with priority and category metadata."""
+    """Custom flow finder that discovers flows with custom metadata."""
     
-    def find_flows(self) -> List[CustomFlowDetails]:
+    def find_flows(self) -> List[FlowDetails]:
         # Sample implementation that returns flows with custom metadata
         flows = []
         
         # Example: discover critical batch processing flows
-        flows.append(CustomFlowDetails(
+        flows.append(FlowDetails(
             name="data_ingestion",
             original_name="data-ingestion",
             description="Daily data ingestion pipeline",
-            obj_type="function",
-            obj_name="run_data_ingestion",
-            obj_parent_type="module",
-            obj_parent="pipelines.ingestion",
             id="flow_001",
-            module="pipelines.ingestion",
             source_path="/src/pipelines/ingestion.py",
             source_relative="pipelines/ingestion.py",
-            import_path="pipelines.ingestion",
             grouping=["data", "batch"],
-            priority=10,  # High priority
-            category="critical"
+            child_attributes={
+                # Implementation-specific attributes go here
+                "obj_type": "function",
+                "obj_name": "run_data_ingestion",
+                "obj_parent_type": "module",
+                "obj_parent": "pipelines.ingestion",
+                "module": "pipelines.ingestion",
+                "import_path": "pipelines.ingestion",
+                # Custom metadata for your specific needs
+                "priority": 10,  # High priority
+                "category": "critical",
+            }
         ))
         
         # Example: discover standard processing flows
-        flows.append(CustomFlowDetails(
+        flows.append(FlowDetails(
             name="data_transformation",
             original_name="data-transformation",
             description="Transform raw data into analytics format",
-            obj_type="function",
-            obj_name="transform_data",
-            obj_parent_type="module",
-            obj_parent="pipelines.transform",
             id="flow_002",
-            module="pipelines.transform",
             source_path="/src/pipelines/transform.py",
             source_relative="pipelines/transform.py",
-            import_path="pipelines.transform",
             grouping=["data", "processing"],
-            priority=5,  # Medium priority
-            category="standard"
+            child_attributes={
+                # Implementation-specific attributes go here
+                "obj_type": "function",
+                "obj_name": "transform_data",
+                "obj_parent_type": "module",
+                "obj_parent": "pipelines.transform",
+                "module": "pipelines.transform", 
+                "import_path": "pipelines.transform",
+                # Custom metadata for your specific needs
+                "priority": 5,  # Medium priority
+                "category": "standard",
+            }
         ))
         
         return flows
@@ -113,38 +107,112 @@ class CustomFlowFinder(FlowFinder):
 flow_finder = CustomFlowFinder()
 ```
 
+**Important:** The `child_attributes` field should be used to store any custom metadata or implementation-specific attributes like `obj_type`, `obj_name`, etc. Platform implementations like `PrefectFlowFinder` and `AirflowFlowFinder` automatically populate these attributes when discovering flows.
+
+## API Changes and Migration
+
+For information about breaking API changes in v1.0.0 and detailed migration instructions, see the [API Migration Guide](api-migration-guide.md).
+
+The guide covers:
+- Complete breakdown of architectural changes
+- Migration instructions for different user types
+- Before/after code examples
+- Validation and testing guidance
+- Easier to integrate with different workflow platforms
+
+### Migration Guide for FlowDetails API Changes
+
+Starting with version 1.0.0, the `FlowDetails` class has been simplified to make several attributes optional that were previously required. This is a **breaking change** that affects how you work with FlowDetails objects.
+
+#### What Changed
+
+Previously required attributes that are now in `child_attributes`:
+- `obj_type` - Type of object defining the flow (e.g., function, method)
+- `obj_name` - Name of the object defining the flow 
+- `obj_parent_type` - Type of container for object defining the flow
+- `obj_parent` - Name of container for flow object
+- `module` - Module name where the flow is defined
+- `import_path` - Python import path to the source file
+
+#### If You Use Prefect Implementation
+
+If you're using the default `PrefectFlowFinder`, **no changes are required** in your setup. The Prefect implementation automatically puts these attributes in `child_attributes` when discovering flows.
+
+To access these attributes from discovered flows:
+```python
+from acme_portal_sdk.prefect.flow_finder import PrefectFlowFinder
+
+finder = PrefectFlowFinder("path/to/flows")
+flows = finder.find_flows()
+
+for flow in flows:
+    # Access implementation-specific attributes via child_attributes
+    obj_type = flow.child_attributes.get("obj_type")  # "function" or "method"
+    obj_name = flow.child_attributes.get("obj_name")  # function/method name
+    module = flow.child_attributes.get("module")      # module name
+    import_path = flow.child_attributes.get("import_path")  # import path
+```
+
+#### If You Create FlowDetails Manually
+
+If you manually create `FlowDetails` objects, you need to update your code:
+
+**Before (v0.x):**
+```python
+flow = FlowDetails(
+    name="my_flow",
+    original_name="my-flow", 
+    description="Example flow",
+    obj_type="function",
+    obj_name="my_function",
+    obj_parent_type="module",
+    obj_parent="my_module",
+    id="flow_123",
+    module="my_module",
+    source_path="/path/to/file.py",
+    source_relative="file.py",
+    import_path="my_module.file"
+)
+```
+
+**After (v1.0+):**
+```python
+flow = FlowDetails(
+    name="my_flow",
+    original_name="my-flow",
+    description="Example flow", 
+    id="flow_123",
+    source_path="/path/to/file.py",
+    source_relative="file.py",
+    child_attributes={
+        "obj_type": "function",
+        "obj_name": "my_function", 
+        "obj_parent_type": "module",
+        "obj_parent": "my_module",
+        "module": "my_module",
+        "import_path": "my_module.file"
+    }
+)
+```
+
 ### Custom DeploymentFinder Implementation
 
-Create a custom `DeploymentFinder` subclass with an extended `DeploymentDetails` class to add deployment-specific metadata:
+Create a custom `DeploymentFinder` subclass to discover deployments in your environment:
 
 ```python
 # .acme-portal-sdk/deployment_finder.py
-from dataclasses import dataclass
 from typing import List
 from acme_portal_sdk.deployment_finder import DeploymentFinder, DeploymentDetails
-
-@dataclass
-class CustomDeploymentDetails(DeploymentDetails):
-    """Extended DeploymentDetails with custom attributes for resource limits and region."""
-    
-    def __init__(self, region: str = "us-east-1", cpu_limit: str = "1000m", **kwargs):
-        # Extract and set custom attributes
-        child_attributes = kwargs.pop('child_attributes', {})
-        child_attributes.update({
-            "region": region,
-            "cpu_limit": cpu_limit
-        })
-        super().__init__(child_attributes=child_attributes, **kwargs)
 
 class CustomDeploymentFinder(DeploymentFinder):
     """Custom deployment finder that discovers deployments with resource and region metadata."""
     
-    def get_deployments(self, project_name: str, branch_name: str, env: str) -> List[CustomDeploymentDetails]:
+    def get_deployments(self, project_name: str, branch_name: str, env: str) -> List[DeploymentDetails]:
         # Sample implementation that returns deployments with custom metadata
         deployments = []
         
         # Example: production deployment with high resources
-        deployments.append(CustomDeploymentDetails(
+        deployments.append(DeploymentDetails(
             name=f"{project_name}--{branch_name}--data_ingestion--{env}",
             project_name=project_name,
             branch=branch_name,
@@ -158,13 +226,18 @@ class CustomDeploymentFinder(DeploymentFinder):
             updated_at="2024-01-15T14:20:00Z",
             flow_id="flow_001",
             url="https://deployment-system.com/deployments/deploy_001",
-            region="us-west-2",  # Custom region
-            cpu_limit="4000m"    # High CPU limit for production
+            child_attributes={
+                # Custom metadata for your specific needs
+                "region": "us-west-2",  # Custom region
+                "cpu_limit": "4000m",   # High CPU limit for production
+                "memory_limit": "8Gi",
+                "health_check_enabled": True,
+            }
         ))
         
         # Example: development deployment with standard resources
         if env == "dev":
-            deployments.append(CustomDeploymentDetails(
+            deployments.append(DeploymentDetails(
                 name=f"{project_name}--{branch_name}--data_transformation--{env}",
                 project_name=project_name,
                 branch=branch_name,
@@ -178,8 +251,13 @@ class CustomDeploymentFinder(DeploymentFinder):
                 updated_at="2024-01-16T09:45:00Z",
                 flow_id="flow_002",
                 url="https://deployment-system.com/deployments/deploy_002",
-                region="us-east-1",  # Standard region for dev
-                cpu_limit="1000m"    # Lower CPU limit for dev
+                child_attributes={
+                    # Custom metadata for your specific needs
+                    "region": "us-east-1",  # Standard region for dev
+                    "cpu_limit": "1000m",   # Lower CPU limit for dev
+                    "memory_limit": "2Gi",
+                    "health_check_enabled": False,
+                }
             ))
         
         return deployments
