@@ -34,6 +34,6 @@ aps check-config
 ## Quick Links
 
 - [Configuration Guide](user-guides.md#configuring-sdk-for-your-project)
-- [Prefect Implementation](user-guides.md#using-default-prefect-based-functionality) 
+- [Prefect Implementation](prefect.md#using-default-prefect-based-functionality) 
 - [API Reference](../developer/api-reference.md)
 - [Example project using the SDK](https://github.com/blackwhitehere/acme-prefect)

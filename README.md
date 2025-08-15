@@ -6,6 +6,8 @@
 
 **acme-portal-sdk** is a Python SDK that provides data and actions for the `acme-portal` VSCode [extension](https://github.com/blackwhitehere/acme-portal). It standardizes the deployment workflow for Python applications that implement "flows" (Jobs/DAGs/Workflows) while allowing full customization of the underlying implementation.
 
+[AI wiki](https://deepwiki.com/blackwhitehere/acme-portal-sdk/)
+
 ### Main Idea
 
 Rather than embedding pre-defined deployment logic in the VSCode extension, the SDK allows you to define custom sources of data and behavior. The extension serves as a UI layer to your SDK implementations, providing a consistent interface for:

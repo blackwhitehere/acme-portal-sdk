@@ -23,4 +23,4 @@ The implementation of those base classes can be provided and configured by user 
 
 For explanation on how to configure your project to work with `acme-portal` using the SDK, checkout [Configuring SDK for your project](../user/user-guides.md#configuring-sdk-for-your-project)
 
-For explanation of the features provided by default `prefect` based implementation checkout [Default functionality of `prefect` based implementation](../user/features.md#default-functionality-of-prefect-based-implementation)
+For explanation of the features provided by default `prefect` based implementation checkout [Default functionality of prefect based implementation](../user/prefect.md#default-functionality-of-prefect-based-implementation)

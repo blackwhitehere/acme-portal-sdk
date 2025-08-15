@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Automated CHANGELOG.md Updates**: Release workflow now automatically updates CHANGELOG.md after publishing by moving [Unreleased] content to versioned sections (#17)
 
 ### Changed
+- **Documentation Reorganization**: Moved Prefect implementation details from user guides to dedicated Prefect page for better organization (#22)
+- **Enhanced Custom Implementation Guide**: Expanded "Creating Custom Workflow Implementations" section to include comprehensive examples for all four base classes (FlowFinder, DeploymentFinder, DeployWorkflow, PromoteWorkflow) with sample data and functionality (#22)
 - **README.md Reorganization**: Moved Problem and Concepts sections to user documentation, added minimal showcase, and created CONTRIBUTING.md as source of truth for development practices (#21)
 
 ## Historical Releases
