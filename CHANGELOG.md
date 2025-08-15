@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0alpha1] - 2025-08-15
+
 ### Added
 - **PrefectFlowAttributes Dataclass**: Created structured dataclass for Prefect-specific flow attributes with comprehensive documentation of each field (#27)
 - **API Changes Documentation**: Added comprehensive section explaining FlowDetails v1.0.0 architectural changes, benefits, and impact (#27)
