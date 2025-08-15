@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0] - 2025-01-21
+
+### Changed
+- **BREAKING: FlowDetails API Simplification**: Removed `obj_type`, `obj_name`, `obj_parent_type`, `obj_parent`, `module`, and `import_path` as required attributes from FlowDetails base class. These implementation-specific attributes are now stored in `child_attributes` for Prefect and Airflow implementations. This allows for a more flexible base class while maintaining backward compatibility for specific implementations. See migration guide in user documentation for details (#27)
+
 ### Added
 - **Line Number Property**: Added `line_number` field to FlowDetails for editor integration to open source files at specific line numbers (#25)
 - **Release Notes Process**: Standardized release notes workflow with automated validation and extraction (#17)

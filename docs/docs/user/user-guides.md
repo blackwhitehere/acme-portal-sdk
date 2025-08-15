@@ -51,10 +51,16 @@ from acme_portal_sdk.flow_finder import FlowFinder, FlowDetails
 
 @dataclass
 class CustomFlowDetails(FlowDetails):
-    """Extended FlowDetails with custom attributes for priority and category."""
+    """Extended FlowDetails with custom attributes for priority and category.
+    
+    Note: Implementation-specific attributes like obj_type, obj_name, obj_parent_type, 
+    obj_parent, module, and import_path should be set in child_attributes, not as 
+    direct attributes. This allows for flexible, implementation-specific metadata 
+    while keeping the base class minimal.
+    """
     
     def __init__(self, priority: int = 0, category: str = "default", **kwargs):
-        # Extract and set custom attributes
+        # Extract and set custom attributes in child_attributes
         child_attributes = kwargs.pop('child_attributes', {})
         child_attributes.update({
             "priority": priority,
@@ -74,18 +80,21 @@ class CustomFlowFinder(FlowFinder):
             name="data_ingestion",
             original_name="data-ingestion",
             description="Daily data ingestion pipeline",
-            obj_type="function",
-            obj_name="run_data_ingestion",
-            obj_parent_type="module",
-            obj_parent="pipelines.ingestion",
             id="flow_001",
-            module="pipelines.ingestion",
             source_path="/src/pipelines/ingestion.py",
             source_relative="pipelines/ingestion.py",
-            import_path="pipelines.ingestion",
             grouping=["data", "batch"],
-            priority=10,  # High priority
-            category="critical"
+            priority=10,  # High priority - stored in child_attributes
+            category="critical",  # Custom metadata - stored in child_attributes
+            child_attributes={
+                # Implementation-specific attributes go here
+                "obj_type": "function",
+                "obj_name": "run_data_ingestion",
+                "obj_parent_type": "module",
+                "obj_parent": "pipelines.ingestion",
+                "module": "pipelines.ingestion",
+                "import_path": "pipelines.ingestion",
+            }
         ))
         
         # Example: discover standard processing flows
@@ -93,24 +102,104 @@ class CustomFlowFinder(FlowFinder):
             name="data_transformation",
             original_name="data-transformation",
             description="Transform raw data into analytics format",
-            obj_type="function",
-            obj_name="transform_data",
-            obj_parent_type="module",
-            obj_parent="pipelines.transform",
             id="flow_002",
-            module="pipelines.transform",
             source_path="/src/pipelines/transform.py",
             source_relative="pipelines/transform.py",
-            import_path="pipelines.transform",
             grouping=["data", "processing"],
-            priority=5,  # Medium priority
-            category="standard"
+            priority=5,  # Medium priority - stored in child_attributes
+            category="standard",  # Custom metadata - stored in child_attributes
+            child_attributes={
+                # Implementation-specific attributes go here
+                "obj_type": "function",
+                "obj_name": "transform_data",
+                "obj_parent_type": "module",
+                "obj_parent": "pipelines.transform",
+                "module": "pipelines.transform", 
+                "import_path": "pipelines.transform",
+            }
         ))
         
         return flows
 
 # Create the instance
 flow_finder = CustomFlowFinder()
+```
+
+**Important:** The `child_attributes` field should not be set by subclasses during normal subclassing, but may be set by users of the dataclasses to add their custom information. Implementation-specific attributes like `obj_type`, `obj_name`, etc. are automatically handled by implementations like `PrefectFlowFinder` and `AirflowFlowFinder`.
+
+### Migration Guide for FlowDetails API Changes
+
+Starting with version 1.0.0, the `FlowDetails` class has been simplified to make several attributes optional that were previously required. This is a **breaking change** that affects how you work with FlowDetails objects.
+
+#### What Changed
+
+Previously required attributes that are now in `child_attributes`:
+- `obj_type` - Type of object defining the flow (e.g., function, method)
+- `obj_name` - Name of the object defining the flow 
+- `obj_parent_type` - Type of container for object defining the flow
+- `obj_parent` - Name of container for flow object
+- `module` - Module name where the flow is defined
+- `import_path` - Python import path to the source file
+
+#### If You Use Prefect Implementation
+
+If you're using the default `PrefectFlowFinder`, **no changes are required** in your setup. The Prefect implementation automatically puts these attributes in `child_attributes` when discovering flows.
+
+To access these attributes from discovered flows:
+```python
+from acme_portal_sdk.prefect.flow_finder import PrefectFlowFinder
+
+finder = PrefectFlowFinder("path/to/flows")
+flows = finder.find_flows()
+
+for flow in flows:
+    # Access implementation-specific attributes via child_attributes
+    obj_type = flow.child_attributes.get("obj_type")  # "function" or "method"
+    obj_name = flow.child_attributes.get("obj_name")  # function/method name
+    module = flow.child_attributes.get("module")      # module name
+    import_path = flow.child_attributes.get("import_path")  # import path
+```
+
+#### If You Create FlowDetails Manually
+
+If you manually create `FlowDetails` objects, you need to update your code:
+
+**Before (v0.x):**
+```python
+flow = FlowDetails(
+    name="my_flow",
+    original_name="my-flow", 
+    description="Example flow",
+    obj_type="function",
+    obj_name="my_function",
+    obj_parent_type="module",
+    obj_parent="my_module",
+    id="flow_123",
+    module="my_module",
+    source_path="/path/to/file.py",
+    source_relative="file.py",
+    import_path="my_module.file"
+)
+```
+
+**After (v1.0+):**
+```python
+flow = FlowDetails(
+    name="my_flow",
+    original_name="my-flow",
+    description="Example flow", 
+    id="flow_123",
+    source_path="/path/to/file.py",
+    source_relative="file.py",
+    child_attributes={
+        "obj_type": "function",
+        "obj_name": "my_function", 
+        "obj_parent_type": "module",
+        "obj_parent": "my_module",
+        "module": "my_module",
+        "import_path": "my_module.file"
+    }
+)
 ```
 
 ### Custom DeploymentFinder Implementation
