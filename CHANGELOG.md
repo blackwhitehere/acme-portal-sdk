@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Line Number Property**: Added `line_number` field to FlowDetails for editor integration to open source files at specific line numbers (#25)
 - **Release Notes Process**: Standardized release notes workflow with automated validation and extraction (#17)
 - **Automated CHANGELOG.md Updates**: Release workflow now automatically updates CHANGELOG.md after publishing by moving [Unreleased] content to versioned sections (#17)
 

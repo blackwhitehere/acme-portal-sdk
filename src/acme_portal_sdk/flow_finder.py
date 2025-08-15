@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import asdict, dataclass, field
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 
 @dataclass
@@ -22,6 +22,7 @@ class FlowDetails:
         source_path: Unambiguous path to the source file from the root of the project
         source_relative: Relative path to the source file from some known root
         import_path: Python import path to the source file
+        line_number: Line number where the flow is defined in the source file
         grouping: Desired grouping of the flow in the context of the project (for navigation)
         child_attributes: Additional attributes that can be set by subclasses
     """
@@ -38,7 +39,8 @@ class FlowDetails:
     source_path: str
     source_relative: str
     import_path: str
-    grouping: List[str]
+    line_number: Optional[int] = None
+    grouping: List[str] = field(default_factory=list)
     child_attributes: Dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
