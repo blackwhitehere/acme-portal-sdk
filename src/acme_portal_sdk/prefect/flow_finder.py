@@ -105,7 +105,7 @@ class PrefectFlowFinder(FlowFinder):
                         "original_name": flow_name,
                         "description": description,
                         "id": flow_key,
-                        "prefect_attributes": prefect_attrs,  # Store the dataclass temporarily
+                        "child_attributes": prefect_attrs,  # Store the dataclass directly
                     }
 
                     # Debug output to help troubleshoot
@@ -172,7 +172,7 @@ class PrefectFlowFinder(FlowFinder):
                 )
                 
                 # Update the import_path in the PrefectFlowAttributes and convert to dict
-                prefect_attrs = flow_data.pop("prefect_attributes")
+                prefect_attrs = flow_data["child_attributes"]  # Get the dataclass directly
                 prefect_attrs.import_path = import_path
                 flow_data["child_attributes"] = prefect_attrs.to_dict()
                 
