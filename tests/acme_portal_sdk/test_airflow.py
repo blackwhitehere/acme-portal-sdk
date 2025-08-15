@@ -38,8 +38,8 @@ my_dag = DAG(
             flow = flows[0]
             assert flow.name == "test_dag"
             assert flow.original_name == "test_dag"
-            assert flow.obj_type == "dag"
-            assert flow.obj_name == "my_dag"
+            assert flow.child_attributes["obj_type"] == "dag"
+            assert flow.child_attributes["obj_name"] == "my_dag"
             assert flow.description == "Test DAG"
 
     def test_find_dags_decorator_style(self):
@@ -70,8 +70,8 @@ dag_instance = my_dag_function()
             flow = flows[0]
             assert flow.name == "decorated_dag"
             assert flow.original_name == "decorated_dag"
-            assert flow.obj_type == "function"
-            assert flow.obj_name == "my_dag_function"
+            assert flow.child_attributes["obj_type"] == "function"
+            assert flow.child_attributes["obj_name"] == "my_dag_function"
             assert flow.description == "Decorated DAG"
 
     def test_find_no_dags(self):

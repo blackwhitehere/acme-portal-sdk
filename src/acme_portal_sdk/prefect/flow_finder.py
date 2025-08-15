@@ -49,23 +49,27 @@ class PrefectFlowFinder(FlowFinder):
                     # Create a unique ID based on the function name and location
                     flow_key = f"{flow_name}_{id(node)}"
 
-                    # TODO: can import_path be set from here where object is already loaded and its import path is available?
-                    self.flows[flow_key] = {
-                        "name": display_name,
-                        "original_name": flow_name,
-                        "description": description,
+                    # Create child_attributes with implementation-specific details
+                    child_attributes = {
                         "obj_type": "function",
                         "obj_name": self.current_function,
                         "obj_parent_type": "module",
                         "obj_parent": self.module,
                         "module": self.module,
-                        "id": flow_key,
                     }
 
                     if self.current_class:
-                        self.flows[flow_key]["obj_type"] = "method"
-                        self.flows[flow_key]["obj_parent"] = self.current_class
-                        self.flows[flow_key]["obj_parent_type"] = "class"
+                        child_attributes["obj_type"] = "method"
+                        child_attributes["obj_parent"] = self.current_class
+                        child_attributes["obj_parent_type"] = "class"
+
+                    self.flows[flow_key] = {
+                        "name": display_name,
+                        "original_name": flow_name,
+                        "description": description,
+                        "id": flow_key,
+                        "child_attributes": child_attributes,
+                    }
 
                     # Debug output to help troubleshoot
                     print(f"Found flow: {display_name} (from function {flow_name})")
@@ -126,9 +130,15 @@ class PrefectFlowFinder(FlowFinder):
                     :-1
                 ]  # Grouping by directory structure
                 package_name = os.path.basename(self.root_dir)
-                flow_data["import_path"] = (
+                import_path = (
                     f"{package_name}.{flow_data['source_relative'].replace(os.sep, '.').replace('.py', '')}"
                 )
+                
+                # Add import_path to child_attributes
+                if "child_attributes" not in flow_data:
+                    flow_data["child_attributes"] = {}
+                flow_data["child_attributes"]["import_path"] = import_path
+                
                 flow_data = FlowDetails(**flow_data)
                 # Add the flow to the results
                 flows[key] = flow_data

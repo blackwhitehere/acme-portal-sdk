@@ -47,21 +47,26 @@ class AirflowFlowFinder(FlowFinder):
 
                     dag_key = f"{dag_id}_{id(node)}"
 
-                    self.dags[dag_key] = {
-                        "name": display_name,
-                        "original_name": dag_id,
-                        "description": description,
+                    # Create child_attributes with implementation-specific details
+                    child_attributes = {
                         "obj_type": "function",
                         "obj_name": node.name,
                         "obj_parent_type": "module",
                         "obj_parent": self.module,
                         "module": self.module,
-                        "id": dag_key,
                     }
 
                     if self.current_class:
-                        self.dags[dag_key]["obj_parent"] = self.current_class
-                        self.dags[dag_key]["obj_parent_type"] = "class"
+                        child_attributes["obj_parent"] = self.current_class
+                        child_attributes["obj_parent_type"] = "class"
+
+                    self.dags[dag_key] = {
+                        "name": display_name,
+                        "original_name": dag_id,
+                        "description": description,
+                        "id": dag_key,
+                        "child_attributes": child_attributes,
+                    }
 
                     print(
                         f"Found DAG: {display_name} (from decorated function {node.name})"
@@ -87,21 +92,26 @@ class AirflowFlowFinder(FlowFinder):
                     # Create a unique ID based on the DAG name and location
                     dag_key = f"{dag_id}_{id(node)}"
 
-                    self.dags[dag_key] = {
-                        "name": display_name,
-                        "original_name": dag_id,
-                        "description": description,
+                    # Create child_attributes with implementation-specific details
+                    child_attributes = {
                         "obj_type": "dag",
                         "obj_name": dag_name,
                         "obj_parent_type": "module",
                         "obj_parent": self.module,
                         "module": self.module,
-                        "id": dag_key,
                     }
 
                     if self.current_class:
-                        self.dags[dag_key]["obj_parent"] = self.current_class
-                        self.dags[dag_key]["obj_parent_type"] = "class"
+                        child_attributes["obj_parent"] = self.current_class
+                        child_attributes["obj_parent_type"] = "class"
+
+                    self.dags[dag_key] = {
+                        "name": display_name,
+                        "original_name": dag_id,
+                        "description": description,
+                        "id": dag_key,
+                        "child_attributes": child_attributes,
+                    }
 
                     # Debug output to help troubleshoot
                     print(f"Found DAG: {display_name} (from variable {dag_name})")
@@ -176,9 +186,15 @@ class AirflowFlowFinder(FlowFinder):
                     :-1
                 ]  # Grouping by directory structure
                 package_name = os.path.basename(self.root_dir)
-                dag_data["import_path"] = (
+                import_path = (
                     f"{package_name}.{dag_data['source_relative'].replace(os.sep, '.').replace('.py', '')}"
                 )
+                
+                # Add import_path to child_attributes
+                if "child_attributes" not in dag_data:
+                    dag_data["child_attributes"] = {}
+                dag_data["child_attributes"]["import_path"] = import_path
+                
                 dag_data = FlowDetails(**dag_data)
                 # Add the DAG to the results
                 dags[key] = dag_data
