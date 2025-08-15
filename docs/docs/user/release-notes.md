@@ -26,4 +26,4 @@ For a complete version history with detailed changes, see the [full changelog](h
 
 ## Contributing to Release Notes
 
-When contributing to the project, please ensure you add an entry to the `[Unreleased]` section in [CHANGELOG.md](https://github.com/blackwhitehere/acme-portal-sdk/blob/main/CHANGELOG.md). See our [contributing guidelines](../developer/contributing.md#release-notes-process) for detailed instructions.
+When contributing to the project, please ensure you add an entry to the `[Unreleased]` section in [CHANGELOG.md](https://github.com/blackwhitehere/acme-portal-sdk/blob/main/CHANGELOG.md). See our [contributing guidelines](../../CONTRIBUTING.md#release-notes-process) for detailed instructions.
