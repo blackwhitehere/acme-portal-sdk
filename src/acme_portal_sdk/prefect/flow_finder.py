@@ -2,12 +2,48 @@ import ast
 import os
 import sys
 import traceback
+from dataclasses import dataclass
 from pprint import pp
 from typing import Dict, List
 
 from acme_portal_sdk.flow_finder import FlowDetails, FlowFinder
 
 PrefectFlowDetails = FlowDetails
+
+
+@dataclass
+class PrefectFlowAttributes:
+    """Dataclass to capture Prefect-specific attributes stored in child_attributes.
+    
+    This dataclass represents the implementation-specific metadata that Prefect
+    flow finder collects about discovered flows. These attributes provide detailed
+    information about how the flow is implemented in Python code.
+    
+    Attributes:
+        obj_type: Type of object defining the flow ("function" or "method")
+        obj_name: Name of the function or method that defines the flow
+        obj_parent_type: Type of container for the flow object ("module" or "class")
+        obj_parent: Name of the module or class containing the flow
+        module: Python module name where the flow is defined
+        import_path: Full Python import path to the source file
+    """
+    obj_type: str
+    obj_name: str
+    obj_parent_type: str
+    obj_parent: str
+    module: str
+    import_path: str
+    
+    def to_dict(self) -> Dict[str, str]:
+        """Convert the dataclass to a dictionary for use in child_attributes."""
+        return {
+            "obj_type": self.obj_type,
+            "obj_name": self.obj_name,
+            "obj_parent_type": self.obj_parent_type,
+            "obj_parent": self.obj_parent,
+            "module": self.module,
+            "import_path": self.import_path,
+        }
 
 
 class PrefectFlowFinder(FlowFinder):
@@ -50,25 +86,26 @@ class PrefectFlowFinder(FlowFinder):
                     flow_key = f"{flow_name}_{id(node)}"
 
                     # Create child_attributes with implementation-specific details
-                    child_attributes = {
-                        "obj_type": "function",
-                        "obj_name": self.current_function,
-                        "obj_parent_type": "module",
-                        "obj_parent": self.module,
-                        "module": self.module,
-                    }
+                    prefect_attrs = PrefectFlowAttributes(
+                        obj_type="function",
+                        obj_name=self.current_function,
+                        obj_parent_type="module",
+                        obj_parent=self.module,
+                        module=self.module,
+                        import_path=""  # Will be set later in _scan_file
+                    )
 
                     if self.current_class:
-                        child_attributes["obj_type"] = "method"
-                        child_attributes["obj_parent"] = self.current_class
-                        child_attributes["obj_parent_type"] = "class"
+                        prefect_attrs.obj_type = "method"
+                        prefect_attrs.obj_parent = self.current_class
+                        prefect_attrs.obj_parent_type = "class"
 
                     self.flows[flow_key] = {
                         "name": display_name,
                         "original_name": flow_name,
                         "description": description,
                         "id": flow_key,
-                        "child_attributes": child_attributes,
+                        "prefect_attributes": prefect_attrs,  # Store the dataclass temporarily
                     }
 
                     # Debug output to help troubleshoot
@@ -134,10 +171,10 @@ class PrefectFlowFinder(FlowFinder):
                     f"{package_name}.{flow_data['source_relative'].replace(os.sep, '.').replace('.py', '')}"
                 )
                 
-                # Add import_path to child_attributes
-                if "child_attributes" not in flow_data:
-                    flow_data["child_attributes"] = {}
-                flow_data["child_attributes"]["import_path"] = import_path
+                # Update the import_path in the PrefectFlowAttributes and convert to dict
+                prefect_attrs = flow_data.pop("prefect_attributes")
+                prefect_attrs.import_path = import_path
+                flow_data["child_attributes"] = prefect_attrs.to_dict()
                 
                 flow_data = FlowDetails(**flow_data)
                 # Add the flow to the results

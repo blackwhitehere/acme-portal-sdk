@@ -41,42 +41,22 @@ The SDK defines four main base classes that need to be implemented:
 
 ### Custom FlowFinder Implementation
 
-Create a custom `FlowFinder` subclass with an extended `FlowDetails` class to add additional flow metadata:
+Create a custom `FlowFinder` subclass to discover flows in your codebase:
 
 ```python
 # .acme-portal-sdk/flow_finder.py
-from dataclasses import dataclass
 from typing import List
 from acme_portal_sdk.flow_finder import FlowFinder, FlowDetails
 
-@dataclass
-class CustomFlowDetails(FlowDetails):
-    """Extended FlowDetails with custom attributes for priority and category.
-    
-    Note: Implementation-specific attributes like obj_type, obj_name, obj_parent_type, 
-    obj_parent, module, and import_path should be set in child_attributes, not as 
-    direct attributes. This allows for flexible, implementation-specific metadata 
-    while keeping the base class minimal.
-    """
-    
-    def __init__(self, priority: int = 0, category: str = "default", **kwargs):
-        # Extract and set custom attributes in child_attributes
-        child_attributes = kwargs.pop('child_attributes', {})
-        child_attributes.update({
-            "priority": priority,
-            "category": category
-        })
-        super().__init__(child_attributes=child_attributes, **kwargs)
-
 class CustomFlowFinder(FlowFinder):
-    """Custom flow finder that discovers flows with priority and category metadata."""
+    """Custom flow finder that discovers flows with custom metadata."""
     
-    def find_flows(self) -> List[CustomFlowDetails]:
+    def find_flows(self) -> List[FlowDetails]:
         # Sample implementation that returns flows with custom metadata
         flows = []
         
         # Example: discover critical batch processing flows
-        flows.append(CustomFlowDetails(
+        flows.append(FlowDetails(
             name="data_ingestion",
             original_name="data-ingestion",
             description="Daily data ingestion pipeline",
@@ -84,8 +64,6 @@ class CustomFlowFinder(FlowFinder):
             source_path="/src/pipelines/ingestion.py",
             source_relative="pipelines/ingestion.py",
             grouping=["data", "batch"],
-            priority=10,  # High priority - stored in child_attributes
-            category="critical",  # Custom metadata - stored in child_attributes
             child_attributes={
                 # Implementation-specific attributes go here
                 "obj_type": "function",
@@ -94,11 +72,14 @@ class CustomFlowFinder(FlowFinder):
                 "obj_parent": "pipelines.ingestion",
                 "module": "pipelines.ingestion",
                 "import_path": "pipelines.ingestion",
+                # Custom metadata for your specific needs
+                "priority": 10,  # High priority
+                "category": "critical",
             }
         ))
         
         # Example: discover standard processing flows
-        flows.append(CustomFlowDetails(
+        flows.append(FlowDetails(
             name="data_transformation",
             original_name="data-transformation",
             description="Transform raw data into analytics format",
@@ -106,8 +87,6 @@ class CustomFlowFinder(FlowFinder):
             source_path="/src/pipelines/transform.py",
             source_relative="pipelines/transform.py",
             grouping=["data", "processing"],
-            priority=5,  # Medium priority - stored in child_attributes
-            category="standard",  # Custom metadata - stored in child_attributes
             child_attributes={
                 # Implementation-specific attributes go here
                 "obj_type": "function",
@@ -116,6 +95,9 @@ class CustomFlowFinder(FlowFinder):
                 "obj_parent": "pipelines.transform",
                 "module": "pipelines.transform", 
                 "import_path": "pipelines.transform",
+                # Custom metadata for your specific needs
+                "priority": 5,  # Medium priority
+                "category": "standard",
             }
         ))
         
@@ -125,7 +107,98 @@ class CustomFlowFinder(FlowFinder):
 flow_finder = CustomFlowFinder()
 ```
 
-**Important:** The `child_attributes` field should not be set by subclasses during normal subclassing, but may be set by users of the dataclasses to add their custom information. Implementation-specific attributes like `obj_type`, `obj_name`, etc. are automatically handled by implementations like `PrefectFlowFinder` and `AirflowFlowFinder`.
+**Important:** The `child_attributes` field should be used to store any custom metadata or implementation-specific attributes like `obj_type`, `obj_name`, etc. Platform implementations like `PrefectFlowFinder` and `AirflowFlowFinder` automatically populate these attributes when discovering flows.
+
+### FlowDetails API Changes in v1.0.0
+
+Version 1.0.0 introduces significant changes to the `FlowDetails` class structure to make it more flexible and implementation-agnostic. This section explains the architectural changes and the reasoning behind them.
+
+#### Architectural Changes
+
+**Before v1.0.0:**
+The `FlowDetails` class required several implementation-specific attributes as part of its constructor. This created tight coupling between the base class and specific implementations:
+
+```python
+# Old API - implementation details required in base class
+FlowDetails(
+    name="my_flow",
+    obj_type="function",      # Implementation detail
+    obj_name="my_function",   # Implementation detail  
+    obj_parent_type="module", # Implementation detail
+    obj_parent="my_module",   # Implementation detail
+    module="my_module",       # Implementation detail
+    import_path="my.module",  # Implementation detail
+    # ... other required fields
+)
+```
+
+**After v1.0.0:**
+The `FlowDetails` class has been simplified to focus only on essential flow metadata. Implementation-specific details are now stored in the flexible `child_attributes` dictionary:
+
+```python
+# New API - implementation details in child_attributes
+FlowDetails(
+    name="my_flow",
+    id="flow_123",
+    source_path="/path/to/file.py",
+    source_relative="file.py",
+    child_attributes={
+        "obj_type": "function",      # Implementation detail
+        "obj_name": "my_function",   # Implementation detail
+        "obj_parent_type": "module", # Implementation detail
+        "obj_parent": "my_module",   # Implementation detail
+        "module": "my_module",       # Implementation detail
+        "import_path": "my.module",  # Implementation detail
+    }
+)
+```
+
+#### Benefits of the New Architecture
+
+1. **Cleaner Base Class**: The base `FlowDetails` class now only requires truly essential attributes that apply to all flow implementations
+2. **Implementation Flexibility**: Different platforms (Prefect, Airflow, custom) can store their own specific metadata without affecting the base interface
+3. **Future-Proof Design**: New implementations can add their own attributes without requiring changes to the base class
+4. **Separation of Concerns**: Core flow identity is separated from implementation-specific metadata
+
+#### Attribute Categories
+
+**Core Required Attributes** (always required):
+- `name` - Display name for the flow
+- `original_name` - Original name as defined in source code
+- `description` - Flow description
+- `id` - Unique identifier for the flow
+- `source_path` - Absolute path to source file
+- `source_relative` - Relative path to source file
+
+**Optional Core Attributes** (may be useful across implementations):
+- `grouping` - Logical grouping of flows
+- `tags` - Flow tags for categorization
+
+**Implementation-Specific Attributes** (stored in `child_attributes`):
+- `obj_type` - Type of object (function, method, class)
+- `obj_name` - Name of the implementing object
+- `obj_parent_type` - Type of parent container (module, class)
+- `obj_parent` - Name of parent container
+- `module` - Python module name
+- `import_path` - Full import path
+- Any platform-specific metadata
+
+#### Impact on Different User Types
+
+**Platform Implementation Users** (using `PrefectFlowFinder`, `AirflowFlowFinder`):
+- **No changes required** to your setup code
+- Flow discovery continues to work as before
+- Access implementation-specific attributes via `flow.child_attributes["attr_name"]`
+
+**Custom Implementation Developers**:
+- Update `FlowDetails` creation to use `child_attributes` for implementation-specific data
+- Base class constructor is now simpler and more focused
+- More flexibility in what metadata to store
+
+**SDK Extenders**:
+- Can now store custom metadata in `child_attributes` without conflicts
+- No need to subclass `FlowDetails` for most customization needs
+- Easier to integrate with different workflow platforms
 
 ### Migration Guide for FlowDetails API Changes
 
@@ -204,36 +277,22 @@ flow = FlowDetails(
 
 ### Custom DeploymentFinder Implementation
 
-Create a custom `DeploymentFinder` subclass with an extended `DeploymentDetails` class to add deployment-specific metadata:
+Create a custom `DeploymentFinder` subclass to discover deployments in your environment:
 
 ```python
 # .acme-portal-sdk/deployment_finder.py
-from dataclasses import dataclass
 from typing import List
 from acme_portal_sdk.deployment_finder import DeploymentFinder, DeploymentDetails
-
-@dataclass
-class CustomDeploymentDetails(DeploymentDetails):
-    """Extended DeploymentDetails with custom attributes for resource limits and region."""
-    
-    def __init__(self, region: str = "us-east-1", cpu_limit: str = "1000m", **kwargs):
-        # Extract and set custom attributes
-        child_attributes = kwargs.pop('child_attributes', {})
-        child_attributes.update({
-            "region": region,
-            "cpu_limit": cpu_limit
-        })
-        super().__init__(child_attributes=child_attributes, **kwargs)
 
 class CustomDeploymentFinder(DeploymentFinder):
     """Custom deployment finder that discovers deployments with resource and region metadata."""
     
-    def get_deployments(self, project_name: str, branch_name: str, env: str) -> List[CustomDeploymentDetails]:
+    def get_deployments(self, project_name: str, branch_name: str, env: str) -> List[DeploymentDetails]:
         # Sample implementation that returns deployments with custom metadata
         deployments = []
         
         # Example: production deployment with high resources
-        deployments.append(CustomDeploymentDetails(
+        deployments.append(DeploymentDetails(
             name=f"{project_name}--{branch_name}--data_ingestion--{env}",
             project_name=project_name,
             branch=branch_name,
@@ -247,13 +306,18 @@ class CustomDeploymentFinder(DeploymentFinder):
             updated_at="2024-01-15T14:20:00Z",
             flow_id="flow_001",
             url="https://deployment-system.com/deployments/deploy_001",
-            region="us-west-2",  # Custom region
-            cpu_limit="4000m"    # High CPU limit for production
+            child_attributes={
+                # Custom metadata for your specific needs
+                "region": "us-west-2",  # Custom region
+                "cpu_limit": "4000m",   # High CPU limit for production
+                "memory_limit": "8Gi",
+                "health_check_enabled": True,
+            }
         ))
         
         # Example: development deployment with standard resources
         if env == "dev":
-            deployments.append(CustomDeploymentDetails(
+            deployments.append(DeploymentDetails(
                 name=f"{project_name}--{branch_name}--data_transformation--{env}",
                 project_name=project_name,
                 branch=branch_name,
@@ -267,8 +331,13 @@ class CustomDeploymentFinder(DeploymentFinder):
                 updated_at="2024-01-16T09:45:00Z",
                 flow_id="flow_002",
                 url="https://deployment-system.com/deployments/deploy_002",
-                region="us-east-1",  # Standard region for dev
-                cpu_limit="1000m"    # Lower CPU limit for dev
+                child_attributes={
+                    # Custom metadata for your specific needs
+                    "region": "us-east-1",  # Standard region for dev
+                    "cpu_limit": "1000m",   # Lower CPU limit for dev
+                    "memory_limit": "2Gi",
+                    "health_check_enabled": False,
+                }
             ))
         
         return deployments
