@@ -150,7 +150,8 @@ class TestDeploymentFinderSelectiveRefetch:
 
     def setup_method(self):
         """Set up test fixtures."""
-        self.deployment1 = DeploymentDetails(
+        # Prefect deployment fixtures (use UUID-style IDs)
+        self.prefect_deployment1 = DeploymentDetails(
             name="project1--main--flow1--dev",
             project_name="project1",
             branch="main",
@@ -159,14 +160,14 @@ class TestDeploymentFinderSelectiveRefetch:
             commit_hash="abc123",
             package_version="1.0.0",
             tags=["tag1"],
-            id="project1--main--flow1--dev",  # In Airflow, ID is the same as dag_id
+            id="deploy1_id",  # Prefect uses UUID-style IDs
             created_at="2023-01-01",
             updated_at="2023-01-01",
-            flow_id="project1--main--flow1--dev",
+            flow_id="flow1_id",
             url="http://example.com/deploy1"
         )
         
-        self.deployment2 = DeploymentDetails(
+        self.prefect_deployment2 = DeploymentDetails(
             name="project1--main--flow2--dev",
             project_name="project1", 
             branch="main",
@@ -175,7 +176,40 @@ class TestDeploymentFinderSelectiveRefetch:
             commit_hash="def456",
             package_version="1.0.0",
             tags=["tag2"],
-            id="project1--main--flow2--dev",  # In Airflow, ID is the same as dag_id
+            id="deploy2_id",  # Prefect uses UUID-style IDs
+            created_at="2023-01-01",
+            updated_at="2023-01-01",
+            flow_id="flow2_id",
+            url="http://example.com/deploy2"
+        )
+        
+        # Airflow deployment fixtures (use DAG ID as deployment ID)
+        self.airflow_deployment1 = DeploymentDetails(
+            name="project1--main--flow1--dev",
+            project_name="project1",
+            branch="main",
+            flow_name="flow1",
+            env="dev",
+            commit_hash="abc123",
+            package_version="1.0.0",
+            tags=["tag1"],
+            id="project1--main--flow1--dev",  # Airflow uses DAG ID as deployment ID
+            created_at="2023-01-01",
+            updated_at="2023-01-01",
+            flow_id="project1--main--flow1--dev",
+            url="http://example.com/deploy1"
+        )
+        
+        self.airflow_deployment2 = DeploymentDetails(
+            name="project1--main--flow2--dev",
+            project_name="project1", 
+            branch="main",
+            flow_name="flow2",
+            env="dev",
+            commit_hash="def456",
+            package_version="1.0.0",
+            tags=["tag2"],
+            id="project1--main--flow2--dev",  # Airflow uses DAG ID as deployment ID
             created_at="2023-01-01",
             updated_at="2023-01-01",
             flow_id="project1--main--flow2--dev",
@@ -268,8 +302,8 @@ class TestDeploymentFinderSelectiveRefetch:
         finder.credentials_verified = True
         
         with patch.dict('os.environ', {'PREFECT_API_URL': 'https://api.prefect.cloud/api/accounts/test/workspaces/test'}):
-            # Only fetch deployment1
-            result = finder.get_deployments(deployments_to_fetch=[self.deployment1])
+            # Only fetch prefect_deployment1
+            result = finder.get_deployments(deployments_to_fetch=[self.prefect_deployment1])
             
         assert len(result) == 1
         assert result[0].id == "deploy1_id"
@@ -342,8 +376,8 @@ class TestDeploymentFinderSelectiveRefetch:
         finder = AirflowDeploymentFinder("http://airflow.example.com", "user", "pass")
         finder.credentials_verified = True
         
-        # Only fetch deployment1 
-        result = finder.get_deployments(deployments_to_fetch=[self.deployment1])
+        # Only fetch airflow_deployment1 
+        result = finder.get_deployments(deployments_to_fetch=[self.airflow_deployment1])
         
         assert len(result) == 1
         assert result[0].id == "project1--main--flow1--dev"
