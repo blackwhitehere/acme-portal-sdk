@@ -2,12 +2,15 @@ import os
 import sys
 import traceback
 from pprint import pp
-from typing import List, Optional
+from typing import List, Optional, TYPE_CHECKING
 from urllib.parse import urljoin
 
 import requests
 
 from acme_portal_sdk.deployment_finder import DeploymentDetails, DeploymentFinder
+
+if TYPE_CHECKING:
+    from acme_portal_sdk.flow_finder import FlowDetails
 
 
 class AirflowDeploymentFinder(DeploymentFinder):
@@ -79,8 +82,20 @@ class AirflowDeploymentFinder(DeploymentFinder):
             return ""
         return urljoin(self.airflow_url, f"/dags/{dag_id}/grid")
 
-    def get_deployments(self) -> List[DeploymentDetails]:
-        """Connect to Airflow and get DAG information."""
+    def get_deployments(
+        self,
+        deployments_to_fetch: Optional[List[DeploymentDetails]] = None,
+        flows_to_fetch: Optional[List["FlowDetails"]] = None
+    ) -> List[DeploymentDetails]:
+        """Connect to Airflow and get DAG information.
+        
+        Args:
+            deployments_to_fetch: Optional list of specific deployments to re-fetch
+            flows_to_fetch: Optional list of flows to re-fetch deployments for
+            
+        Returns:
+            List of DeploymentDetails objects
+        """
         if not self.credentials_verified:
             print("Airflow credentials not verified. Cannot fetch deployments.")
             return []
@@ -157,10 +172,32 @@ class AirflowDeploymentFinder(DeploymentFinder):
                     },
                 )
 
-                result.append(deploy_info)
-                print(
-                    f"Added DAG: {deploy_info.project_name}/{flow_name} ({deploy_info.branch}/{deploy_info.env})"
-                )
+                # Filter based on selective parameters
+                should_include = True
+                
+                # If no selective parameters provided, include all
+                if deployments_to_fetch is None and flows_to_fetch is None:
+                    should_include = True
+                else:
+                    should_include = False
+                    
+                    # Check if this deployment should be included based on deployments_to_fetch
+                    if deployments_to_fetch is not None:
+                        deployment_ids_to_fetch = {d.id for d in deployments_to_fetch}
+                        if deploy_info.id in deployment_ids_to_fetch:
+                            should_include = True
+                    
+                    # Check if this deployment should be included based on flows_to_fetch
+                    if flows_to_fetch is not None and not should_include:
+                        flow_names_to_fetch = {f.name for f in flows_to_fetch}
+                        if deploy_info.flow_name in flow_names_to_fetch:
+                            should_include = True
+
+                if should_include:
+                    result.append(deploy_info)
+                    print(
+                        f"Added DAG: {deploy_info.project_name}/{flow_name} ({deploy_info.branch}/{deploy_info.env})"
+                    )
 
             return result
         except ImportError:

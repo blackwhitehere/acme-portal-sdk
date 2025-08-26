@@ -1,6 +1,9 @@
 from abc import ABC, abstractmethod
 from dataclasses import asdict, dataclass, field
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .flow_finder import FlowDetails
 
 
 @dataclass
@@ -53,8 +56,20 @@ class DeploymentFinder(ABC):
     """Discovers existing deployments in target environments, with implementations providing environment-specific discovery."""
 
     @abstractmethod
-    def get_deployments(self) -> List[DeploymentDetails]:
-        """Method to find deployments, to be implemented by subclasses."""
+    def get_deployments(
+        self,
+        deployments_to_fetch: Optional[List[DeploymentDetails]] = None,
+        flows_to_fetch: Optional[List["FlowDetails"]] = None
+    ) -> List[DeploymentDetails]:
+        """Method to find deployments, to be implemented by subclasses.
+        
+        Args:
+            deployments_to_fetch: Optional list of specific deployments to re-fetch
+            flows_to_fetch: Optional list of flows to re-fetch deployments for
+            
+        Returns:
+            List of DeploymentDetails objects
+        """
         pass
 
     def __call__(self) -> List[Dict[str, Any]]:

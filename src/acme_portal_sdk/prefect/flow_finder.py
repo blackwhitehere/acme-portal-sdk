@@ -4,7 +4,7 @@ import sys
 import traceback
 from dataclasses import dataclass
 from pprint import pp
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from acme_portal_sdk.flow_finder import FlowDetails, FlowFinder
 
@@ -211,8 +211,45 @@ class PrefectFlowFinder(FlowFinder):
 
         return all_flows
 
-    def find_flows(self) -> List[FlowDetails]:
-        return list(self._scan_directory(self.root_dir).values())
+    def find_flows(
+        self, 
+        flows_to_fetch: Optional[List[FlowDetails]] = None,
+        flow_groups: Optional[List[str]] = None
+    ) -> List[FlowDetails]:
+        """Find flows, optionally re-fetching specific flows or groups.
+        
+        Args:
+            flows_to_fetch: Optional list of flows to selectively re-fetch data for
+            flow_groups: Optional list of flow group names to selectively re-fetch
+            
+        Returns:
+            List of FlowDetails objects
+        """
+        all_flows = self._scan_directory(self.root_dir)
+        
+        # If no selective parameters provided, return all flows
+        if flows_to_fetch is None and flow_groups is None:
+            return list(all_flows.values())
+            
+        result = []
+        
+        # Handle selective flow re-fetching
+        if flows_to_fetch is not None:
+            flows_to_fetch_keys = {(flow.name, flow.source_relative) for flow in flows_to_fetch}
+            for flow_id, flow in all_flows.items():
+                if (flow.name, flow.source_relative) in flows_to_fetch_keys:
+                    result.append(flow)
+        
+        # Handle flow groups re-fetching
+        if flow_groups is not None:
+            for flow in all_flows.values():
+                # Check if any of the flow's grouping elements match the requested groups
+                if any(group in flow_groups for group in flow.grouping):
+                    # Avoid duplicates if flow was already added from flows_to_fetch
+                    if flows_to_fetch is None or (flow.name, flow.source_relative) not in {(f.name, f.source_relative) for f in flows_to_fetch}:
+                        result.append(flow)
+        
+        return result
 
 
 if __name__ == "__main__":
