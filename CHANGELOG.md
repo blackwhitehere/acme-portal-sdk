@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Selective Re-fetching Support**: Added optional parameters `flows_to_fetch` and `flow_groups` to FlowFinder.find_flows method, and `deployments_to_fetch` and `flows_to_fetch` to DeploymentFinder.get_deployments method for selective data re-fetching instead of full scans (#30)
+
 ## [1.0.0alpha1] - 2025-08-15
 
 ### Added

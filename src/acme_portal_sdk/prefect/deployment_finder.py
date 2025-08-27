@@ -2,12 +2,15 @@ import os
 import sys
 import traceback
 from pprint import pp
-from typing import List
+from typing import List, Optional, TYPE_CHECKING
 
 from prefect.client.orchestration import get_client
 
 from acme_portal_sdk.deployment_finder import (DeploymentDetails,
                                                DeploymentFinder)
+
+if TYPE_CHECKING:
+    from acme_portal_sdk.flow_finder import FlowDetails
 
 
 class PrefectDeploymentFinder(DeploymentFinder):
@@ -46,8 +49,20 @@ class PrefectDeploymentFinder(DeploymentFinder):
         )
         return f"{prefect_app_url}/deployments/deployment/{deployment_id}"
 
-    def get_deployments(self) -> List[DeploymentDetails]:
-        """Connect to Prefect and get deployment information."""
+    def get_deployments(
+        self,
+        deployments_to_fetch: Optional[List[DeploymentDetails]] = None,
+        flows_to_fetch: Optional[List["FlowDetails"]] = None
+    ) -> List[DeploymentDetails]:
+        """Connect to Prefect and get deployment information.
+        
+        Args:
+            deployments_to_fetch: Optional list of specific deployments to re-fetch
+            flows_to_fetch: Optional list of flows to re-fetch deployments for
+            
+        Returns:
+            List of DeploymentDetails objects
+        """
         try:
             client = get_client(sync_client=True)
             deployments = client.read_deployments()
@@ -97,11 +112,33 @@ class PrefectDeploymentFinder(DeploymentFinder):
                     flow_id=str(deployment.flow_id),
                     url=self._get_deployment_url(str(deployment.id)),
                 )
+                
+                # Filter based on selective parameters
+                should_include = True
+                
+                # If no selective parameters provided, include all
+                if deployments_to_fetch is None and flows_to_fetch is None:
+                    should_include = True
+                else:
+                    should_include = False
+                    
+                    # Check if this deployment should be included based on deployments_to_fetch
+                    if deployments_to_fetch is not None:
+                        deployment_ids_to_fetch = {d.id for d in deployments_to_fetch}
+                        if deploy_info.id in deployment_ids_to_fetch:
+                            should_include = True
+                    
+                    # Check if this deployment should be included based on flows_to_fetch
+                    if flows_to_fetch is not None and not should_include:
+                        flow_names_to_fetch = {f.name for f in flows_to_fetch}
+                        if deploy_info.flow_name in flow_names_to_fetch:
+                            should_include = True
 
-                result.append(deploy_info)
-                print(
-                    f"Added deployment: {deploy_info.project_name}/{flow_name} ({deploy_info.branch}/{deploy_info.env})"
-                )
+                if should_include:
+                    result.append(deploy_info)
+                    print(
+                        f"Added deployment: {deploy_info.project_name}/{flow_name} ({deploy_info.branch}/{deploy_info.env})"
+                    )
 
             return result
         except ImportError:

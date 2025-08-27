@@ -47,8 +47,20 @@ class FlowFinder(ABC):
     """Finds flows (units of work/programs) in a given context, with implementations providing specific discovery mechanisms."""
 
     @abstractmethod
-    def find_flows(self) -> List[FlowDetails]:
-        """Method to find flows, to be implemented by subclasses."""
+    def find_flows(
+        self, 
+        flows_to_fetch: Optional[List[FlowDetails]] = None,
+        flow_groups: Optional[List[str]] = None
+    ) -> List[FlowDetails]:
+        """Method to find flows, to be implemented by subclasses.
+        
+        Args:
+            flows_to_fetch: Optional list of flows to selectively re-fetch data for
+            flow_groups: Optional list of flow group names to selectively re-fetch
+            
+        Returns:
+            List of FlowDetails objects
+        """
         pass
 
     def __call__(self) -> List[Dict[str, Any]]:
