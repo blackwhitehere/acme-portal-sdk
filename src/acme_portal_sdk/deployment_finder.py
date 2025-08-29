@@ -1,9 +1,8 @@
 from abc import ABC, abstractmethod
 from dataclasses import asdict, dataclass, field
-from typing import Any, Dict, List, Optional, TYPE_CHECKING
+from typing import Any, Dict, List, Optional
 
-if TYPE_CHECKING:
-    from .flow_finder import FlowDetails
+from .flow_finder import FlowDetails
 
 
 @dataclass
