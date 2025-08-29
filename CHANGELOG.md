@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Fix unupdated call method in ABCs after method signature change** Fixed interface bug (63ade61)
+
 ## [1.1.0alpha1] - 2025-08-29
 
 ### Added
