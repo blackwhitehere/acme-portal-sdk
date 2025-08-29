@@ -58,19 +58,20 @@ class DeploymentFinder(ABC):
     @abstractmethod
     def get_deployments(
         self,
+        *,
         deployments_to_fetch: Optional[List[DeploymentDetails]] = None,
-        flows_to_fetch: Optional[List["FlowDetails"]] = None
+        flows_to_fetch: Optional[List["FlowDetails"]] = None,
     ) -> List[DeploymentDetails]:
         """Method to find deployments, to be implemented by subclasses.
-        
-        Args:
+
+        kwargs:
             deployments_to_fetch: Optional list of specific deployments to re-fetch
             flows_to_fetch: Optional list of flows to re-fetch deployments for
-            
+
         Returns:
             List of DeploymentDetails objects
         """
         pass
 
-    def __call__(self) -> List[Dict[str, Any]]:
-        return [x.to_dict() for x in self.get_deployments()]
+    def __call__(self, **kwargs) -> List[Dict[str, Any]]:
+        return [x.to_dict() for x in self.get_deployments(**kwargs)]
