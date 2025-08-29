@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.2alpha1] - 2025-08-29
+
 ### Fixed
 - **Serializable call args** Fixed type casting for __call__ method (90becf3)
 
