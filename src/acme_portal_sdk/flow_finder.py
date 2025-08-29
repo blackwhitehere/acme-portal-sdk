@@ -64,5 +64,19 @@ class FlowFinder(ABC):
         """
         pass
 
-    def __call__(self, **kwargs) -> List[Dict[str, Any]]:
-        return [x.to_dict() for x in self.find_flows(**kwargs)]
+    def __call__(
+        self,
+        *,
+        flows_to_fetch: Optional[List[dict]] = None,
+        flow_groups: Optional[List[str]] = None,
+    ) -> List[Dict[str, Any]]:
+        """Passthrough method for find_flows call that is operating on JSON (serializable) types"""
+        return [
+            x.to_dict()
+            for x in self.find_flows(
+                flows_to_fetch=[FlowDetails.from_dict(x) for x in flows_to_fetch]
+                if flows_to_fetch is not None
+                else flows_to_fetch,
+                flow_groups=flow_groups,
+            )
+        ]
