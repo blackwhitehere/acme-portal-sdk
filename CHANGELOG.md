@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Import error** Fixed import error (fc30d1e)
+
 ## [1.1.2alpha1] - 2025-08-29
 
 ### Fixed
