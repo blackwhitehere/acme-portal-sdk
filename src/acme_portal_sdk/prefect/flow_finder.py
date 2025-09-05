@@ -20,15 +20,18 @@ class PrefectFlowAttributes:
     information about how the flow is implemented in Python code.
     
     Attributes:
+        obj_name: Name of the function or method that defines the flow (required for deployment)
         module: Python module name where the flow is defined
         import_path: Full Python import path to the source file
     """
+    obj_name: str  # Required for deployment - used in flow_deploy.py to import flow function
     module: str
     import_path: str
     
     def to_dict(self) -> Dict[str, str]:
         """Convert the dataclass to a dictionary for use in child_attributes."""
         return {
+            "obj_name": self.obj_name,
             "module": self.module,
             "import_path": self.import_path,
         }
@@ -75,14 +78,10 @@ class PrefectFlowFinder(FlowFinder):
 
                     # Create child_attributes with implementation-specific details
                     prefect_attrs = PrefectFlowAttributes(
+                        obj_name=self.current_function,  # Required for deployment functionality
                         module=self.module,
                         import_path=""  # Will be set later in _scan_file
                     )
-
-                    # Create additional child attributes (including obj_name needed for deployment)
-                    additional_attrs = {
-                        "obj_name": self.current_function,  # Keep for deployment functionality
-                    }
 
                     self.flows[flow_key] = {
                         "name": display_name,
@@ -90,7 +89,6 @@ class PrefectFlowFinder(FlowFinder):
                         "description": description,
                         "id": flow_key,
                         "child_attributes": prefect_attrs,  # Store the dataclass directly
-                        "additional_child_attrs": additional_attrs,  # Store additional attributes separately
                     }
 
                     # Debug output to help troubleshoot
@@ -160,13 +158,8 @@ class PrefectFlowFinder(FlowFinder):
                 prefect_attrs = flow_data["child_attributes"]  # Get the dataclass directly
                 prefect_attrs.import_path = import_path
                 
-                # Merge PrefectFlowAttributes with additional attributes
-                combined_child_attrs = prefect_attrs.to_dict()
-                if "additional_child_attrs" in flow_data:
-                    combined_child_attrs.update(flow_data["additional_child_attrs"])
-                    del flow_data["additional_child_attrs"]  # Remove temporary key
-                
-                flow_data["child_attributes"] = combined_child_attrs
+                # Convert PrefectFlowAttributes to dict for child_attributes
+                flow_data["child_attributes"] = prefect_attrs.to_dict()
                 
                 flow_data = FlowDetails(**flow_data)
                 # Add the flow to the results

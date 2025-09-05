@@ -121,7 +121,7 @@ Starting with version 1.0.0, the `FlowDetails` class has been simplified to make
 #### What Changed
 
 Previously required attributes that are now in `child_attributes`:
-- `obj_name` - Name of the object defining the flow (still available for deployment needs)
+- `obj_name` - Name of the object defining the flow (kept in PrefectFlowAttributes for deployment needs)
 - `module` - Module name where the flow is defined
 - `import_path` - Python import path to the source file
 
