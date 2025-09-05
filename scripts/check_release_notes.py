@@ -178,7 +178,7 @@ def validate_release_notes(target_pr: Optional[int] = None) -> None:
 
 
 def main():
-    """Main execution"""
+    """Main execution - trigger CI"""
     pr_number = None
     if len(sys.argv) > 1:
         try:
