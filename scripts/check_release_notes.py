@@ -32,7 +32,19 @@ PR_LINK_REGEX = re.compile(r"\(#(\d+)\)")
 def read_changelog() -> str:
     """Reads and parses the CHANGELOG.md file"""
     try:
-        return CHANGELOG_PATH.read_text(encoding='utf-8')
+        print(f"🔍 Looking for CHANGELOG.md at: {CHANGELOG_PATH.absolute()}")
+        print(f"🔍 File exists: {CHANGELOG_PATH.exists()}")
+        
+        content = CHANGELOG_PATH.read_text(encoding='utf-8')
+        print(f"🔍 File size: {len(content)} characters")
+        
+        # Show first few lines for debugging
+        first_lines = content.split('\n')[:15]
+        print(f"🔍 First 15 lines:")
+        for i, line in enumerate(first_lines, 1):
+            print(f"  {i:2}: {repr(line)}")
+        
+        return content
     except Exception as error:
         print(f"❌ Error reading CHANGELOG.md: {error}")
         sys.exit(1)
@@ -40,8 +52,20 @@ def read_changelog() -> str:
 
 def extract_unreleased_section(content: str) -> Optional[str]:
     """Extracts the [Unreleased] section from changelog content"""
+    print(f"🔍 Searching for Unreleased section with regex: {UNRELEASED_SECTION_REGEX.pattern}")
     match = UNRELEASED_SECTION_REGEX.search(content)
-    return match.group(1).strip() if match else None
+    
+    if match:
+        section_content = match.group(1).strip()
+        print(f"🔍 Found Unreleased section, content length: {len(section_content)}")
+        print(f"🔍 Section content preview: {repr(section_content[:200])}")
+        return section_content
+    else:
+        print("🔍 No match found for Unreleased section")
+        # Let's see what ## sections we do find
+        all_sections = re.findall(r'## \[[^\]]+\]', content)
+        print(f"🔍 Found these sections: {all_sections}")
+        return None
 
 
 def extract_pr_numbers(unreleased_content: str) -> List[int]:
