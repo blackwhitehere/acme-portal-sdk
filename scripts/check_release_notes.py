@@ -32,19 +32,7 @@ PR_LINK_REGEX = re.compile(r"\(#(\d+)\)")
 def read_changelog() -> str:
     """Reads and parses the CHANGELOG.md file"""
     try:
-        print(f"🔍 Looking for CHANGELOG.md at: {CHANGELOG_PATH.absolute()}")
-        print(f"🔍 File exists: {CHANGELOG_PATH.exists()}")
-        
-        content = CHANGELOG_PATH.read_text(encoding='utf-8')
-        print(f"🔍 File size: {len(content)} characters")
-        
-        # Show first few lines for debugging
-        first_lines = content.split('\n')[:15]
-        print(f"🔍 First 15 lines:")
-        for i, line in enumerate(first_lines, 1):
-            print(f"  {i:2}: {repr(line)}")
-        
-        return content
+        return CHANGELOG_PATH.read_text(encoding='utf-8')
     except Exception as error:
         print(f"❌ Error reading CHANGELOG.md: {error}")
         sys.exit(1)
@@ -52,20 +40,8 @@ def read_changelog() -> str:
 
 def extract_unreleased_section(content: str) -> Optional[str]:
     """Extracts the [Unreleased] section from changelog content"""
-    print(f"🔍 Searching for Unreleased section with regex: {UNRELEASED_SECTION_REGEX.pattern}")
     match = UNRELEASED_SECTION_REGEX.search(content)
-    
-    if match:
-        section_content = match.group(1).strip()
-        print(f"🔍 Found Unreleased section, content length: {len(section_content)}")
-        print(f"🔍 Section content preview: {repr(section_content[:200])}")
-        return section_content
-    else:
-        print("🔍 No match found for Unreleased section")
-        # Let's see what ## sections we do find
-        all_sections = re.findall(r'## \[[^\]]+\]', content)
-        print(f"🔍 Found these sections: {all_sections}")
-        return None
+    return match.group(1).strip() if match else None
 
 
 def extract_pr_numbers(unreleased_content: str) -> List[int]:
@@ -122,12 +98,30 @@ def validate_release_notes(target_pr: Optional[int] = None) -> None:
     # Read changelog
     content = read_changelog()
     
+    # Check for merge conflict markers that might indicate a problematic merge
+    if any(marker in content for marker in ['<<<<<<<', '>>>>>>>', '=======']):
+        print("⚠️  Merge conflict markers detected in CHANGELOG.md")
+        print("   This usually happens when there are conflicts during PR merge.")
+        print("   Please resolve the merge conflicts and ensure the [Unreleased] section is intact.")
+        sys.exit(1)
+    
     # Extract unreleased section
     unreleased_section = extract_unreleased_section(content)
     
     if not unreleased_section:
         print("❌ No [Unreleased] section found in CHANGELOG.md")
         print("   Please ensure CHANGELOG.md contains a ## [Unreleased] section")
+        print()
+        print("💡 This can happen when:")
+        print("   - The [Unreleased] section header is missing")
+        print("   - There are merge conflicts that removed the section")
+        print("   - The file format doesn't match the expected structure")
+        print()
+        print("   Expected format:")
+        print("   ## [Unreleased]")
+        print()
+        print("   ### Added|Changed|Fixed")
+        print("   - **Feature**: Description (#PR_NUMBER)")
         sys.exit(1)
     
     # If checking for specific PR
@@ -178,7 +172,7 @@ def validate_release_notes(target_pr: Optional[int] = None) -> None:
 
 
 def main():
-    """Main execution - trigger CI"""
+    """Main execution"""
     pr_number = None
     if len(sys.argv) > 1:
         try:
