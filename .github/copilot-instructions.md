@@ -9,7 +9,15 @@ Adhere to DRY (don't repeat yourself) principle if possible. Centralize definiti
 Design systems to have orthogonal functionality.
 
 Check for python typing information in method signatures is correct and if documentation needs to be updated to reflect existing funcionality.
-Keep documentation concise but informative and avoid excess comments that just describe what code is doing.
+
+## Documentation Style
+
+Write documentation that is direct, concise, and actionable:
+- Use clear, simple language
+- Remove verbose explanations and unnecessary context  
+- Focus on what users need to do, not why or how it works internally
+- Eliminate redundant information
+- Keep code comments minimal - only explain complex logic, not obvious actions
 
 ## Release Notes Requirements
 

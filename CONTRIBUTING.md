@@ -130,56 +130,31 @@ All changes require:
 
 ## Release Notes Process
 
-**Every pull request must include a release notes entry** in `CHANGELOG.md`. This ensures proper documentation of all changes and enables automated release generation.
+**Every PR must include a release notes entry** in `CHANGELOG.md`.
 
-### Contributing Changes to Release Notes
+### Adding Release Notes
 
-1. **Add Your Change to CHANGELOG.md**
-   - Open `CHANGELOG.md` 
-   - Find the `## [Unreleased]` section at the top
-   - Add your change under the appropriate subsection:
-     - `### Added` - for new features
-     - `### Changed` - for changes in existing functionality  
-     - `### Deprecated` - for soon-to-be removed features
-     - `### Removed` - for now removed features
-     - `### Fixed` - for any bug fixes
-     - `### Security` - for security-related changes
+1. **Edit CHANGELOG.md**
+   - Find the `## [Unreleased]` section
+   - Add your change under the appropriate category:
+     - `### Added` - new features
+     - `### Changed` - functionality changes  
+     - `### Fixed` - bug fixes
+     - `### Security` - security updates
 
-2. **Format Your Entry**
+2. **Format Entry**
    ```markdown
    ### Added
-   - **Feature Name**: Brief description of the change (#PR_NUMBER)
-   ```
-   
-   **Examples:**
-   ```markdown
-   ### Added
-   - **CLI Progress Display**: Real-time progress updates during deployment operations (#42)
-   
-   ### Fixed
-   - **Configuration Loading**: Fixed issue where environment variables weren't being loaded correctly (#43)
-   
-   ### Changed
-   - **API Response Format**: Improved error response structure for better debugging (#44)
+   - **Feature Name**: Brief description (#PR_NUMBER)
    ```
 
-3. **Link Your Pull Request**
-   - Always include the PR number in parentheses: `(#123)`
-   - This creates automatic linking and enables automated validation
+3. **Include PR Reference**
+   - Always add PR number: `(#123)`
+   - Enables automatic validation
 
-### Release Notes Validation
-- **CI Check**: Automated validation ensures all PRs are referenced in release notes
-- **PR Requirements**: Your PR will fail CI if release notes entry is missing
-- **Review Process**: Maintainers will verify release notes during code review
-
-### Manual Validation
-You can validate your release notes locally:
+### Validation
 ```bash
-# General format validation
-python scripts/check_release_notes.py
-
-# Check specific PR reference (after PR is created)
-python scripts/check_release_notes.py 123
+python scripts/check_release_notes.py [PR_NUMBER]
 ```
 
 ## Version Management

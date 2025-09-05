@@ -1,124 +1,65 @@
 # API Migration Guide
 
-This guide covers breaking changes and migration steps for major API updates in the acme-portal-sdk.
-
 ## FlowDetails API Changes in v1.0.0
 
-Version 1.0.0 introduces significant changes to the `FlowDetails` class structure to make it more flexible and implementation-agnostic. This section explains the architectural changes and provides comprehensive migration guidance.
+Version 1.0.0 moves implementation-specific attributes to `child_attributes`.
 
-### Architectural Changes
+### Changes
 
-**Before v1.0.0:**
-The `FlowDetails` class required several implementation-specific attributes as part of its constructor. This created tight coupling between the base class and specific implementations:
-
+**Before:**
 ```python
-# Old API - implementation details required in base class
 FlowDetails(
     name="my_flow",
-    obj_type="function",      # Implementation detail
-    obj_name="my_function",   # Implementation detail  
-    obj_parent_type="module", # Implementation detail
-    obj_parent="my_module",   # Implementation detail
-    module="my_module",       # Implementation detail
-    import_path="my.module",  # Implementation detail
-    # ... other required fields
+    obj_type="function",
+    obj_name="my_function",
+    obj_parent_type="module",
+    obj_parent="my_module",
+    module="my_module",
+    import_path="my.module",
 )
 ```
 
-**After v1.0.0:**
-The `FlowDetails` class has been simplified to focus only on essential flow metadata. Implementation-specific details are now stored in the flexible `child_attributes` dictionary:
-
+**After:**
 ```python
-# New API - implementation details in child_attributes
 FlowDetails(
     name="my_flow",
     id="flow_123",
     source_path="/path/to/file.py",
     source_relative="file.py",
     child_attributes={
-        "obj_type": "function",      # Implementation detail
-        "obj_name": "my_function",   # Implementation detail
-        "obj_parent_type": "module", # Implementation detail
-        "obj_parent": "my_module",   # Implementation detail
-        "module": "my_module",       # Implementation detail
-        "import_path": "my.module",  # Implementation detail
+        "obj_type": "function",
+        "obj_name": "my_function",
+        "obj_parent_type": "module",
+        "obj_parent": "my_module",
+        "module": "my_module",
+        "import_path": "my.module",
     }
 )
 ```
 
-### Benefits of the New Architecture
+### Moved Attributes
 
-1. **Cleaner Base Class**: The base `FlowDetails` class now only requires truly essential attributes that apply to all flow implementations
-2. **Implementation Flexibility**: Different platforms (Prefect, Airflow, custom) can store their own specific metadata without affecting the base interface
-3. **Future-Proof Design**: New implementations can add their own attributes without requiring changes to the base class
-4. **Separation of Concerns**: Core flow identity is separated from implementation-specific metadata
+These attributes moved to `child_attributes`:
+- `obj_type`, `obj_name`, `obj_parent_type`, `obj_parent`, `module`, `import_path`
 
-### Breaking Changes Summary
+Access via: `flow.child_attributes["attribute_name"]`
 
-The following attributes have been **removed as required parameters** from the `FlowDetails` constructor:
+### Migration by User Type
 
-- `obj_type` - Type of object (function, method, class)
-- `obj_name` - Name of the implementing object  
-- `obj_parent_type` - Type of parent container (module, class)
-- `obj_parent` - Name of parent container
-- `module` - Python module name
-- `import_path` - Full import path
+#### Platform Users (Prefect/Airflow)
 
-These attributes are now stored in the `child_attributes` dictionary and accessed via `flow.child_attributes["attribute_name"]`.
+No setup changes required. Update attribute access:
 
-### Attribute Categories
-
-**Core Required Attributes** (always required):
-- `name` - Display name for the flow
-- `original_name` - Original name as defined in source code
-- `description` - Flow description
-- `id` - Unique identifier for the flow
-- `source_path` - Absolute path to source file
-- `source_relative` - Relative path to source file
-
-**Optional Core Attributes** (may be useful across implementations):
-- `grouping` - Logical grouping of flows
-- `tags` - Flow tags for categorization
-
-**Implementation-Specific Attributes** (stored in `child_attributes`):
-- `obj_type` - Type of object (function, method, class)
-- `obj_name` - Name of the implementing object
-- `obj_parent_type` - Type of parent container (module, class)
-- `obj_parent` - Name of parent container
-- `module` - Python module name
-- `import_path` - Full import path
-- Any platform-specific metadata
-
-### Migration Instructions by User Type
-
-#### Platform Implementation Users (Prefect/Airflow)
-
-**No changes required** to your setup code! Flow discovery continues to work as before.
-
-**Before v1.0.0:**
+**Before:**
 ```python
-from acme_portal_sdk.prefect import PrefectFlowFinder
-
-finder = PrefectFlowFinder("./flows")
-flows = finder.find_flows()
-
-# Access implementation-specific attributes directly
 obj_type = flows[0].obj_type
 obj_name = flows[0].obj_name
-module = flows[0].module
 ```
 
-**After v1.0.0:**
+**After:**
 ```python
-from acme_portal_sdk.prefect import PrefectFlowFinder
-
-finder = PrefectFlowFinder("./flows")  # No change needed
-flows = finder.find_flows()            # No change needed
-
-# Access implementation-specific attributes via child_attributes
 obj_type = flows[0].child_attributes["obj_type"]
-obj_name = flows[0].child_attributes["obj_name"] 
-module = flows[0].child_attributes["module"]
+obj_name = flows[0].child_attributes["obj_name"]
 ```
 
 #### Custom Implementation Developers
