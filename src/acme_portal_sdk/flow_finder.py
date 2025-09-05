@@ -18,8 +18,8 @@ class FlowDetails:
         source_relative: Relative path to the source file from some known root
         line_number: Line number where the flow is defined in the source file
         grouping: Desired grouping of the flow in the context of the project (for navigation)
-        child_attributes: Additional attributes specific to implementation (e.g., obj_type, obj_name,
-                         obj_parent_type, obj_parent, module, import_path for Prefect). Should not be
+        child_attributes: Additional attributes specific to implementation (e.g., obj_name,
+                         module, import_path for Prefect). Should not be
                          set by subclasses, but may be set by users to add custom information.
     """
 
