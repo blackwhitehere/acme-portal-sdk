@@ -117,13 +117,31 @@ def validate_release_notes(target: Optional[str] = None) -> None:
 
     # Read changelog
     content = read_changelog()
-
+    
+    # Check for merge conflict markers that might indicate a problematic merge
+    if any(marker in content for marker in ['<<<<<<<', '>>>>>>>', '=======']):
+        print("⚠️  Merge conflict markers detected in CHANGELOG.md")
+        print("   This usually happens when there are conflicts during PR merge.")
+        print("   Please resolve the merge conflicts and ensure the [Unreleased] section is intact.")
+        sys.exit(1)
+    
     # Extract unreleased section
     unreleased_section = extract_unreleased_section(content)
 
     if not unreleased_section:
         print("❌ No [Unreleased] section found in CHANGELOG.md")
         print("   Please ensure CHANGELOG.md contains a ## [Unreleased] section")
+        print()
+        print("💡 This can happen when:")
+        print("   - The [Unreleased] section header is missing")
+        print("   - There are merge conflicts that removed the section")
+        print("   - The file format doesn't match the expected structure")
+        print()
+        print("   Expected format:")
+        print("   ## [Unreleased]")
+        print()
+        print("   ### Added|Changed|Fixed")
+        print("   - **Feature**: Description (#PR_NUMBER)")
         sys.exit(1)
 
     # If checking for specific PR or commit

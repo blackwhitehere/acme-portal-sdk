@@ -42,7 +42,11 @@ jobs:
 
     - name: Check release notes format
       run: |
-        python scripts/check_release_notes.py
+        if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+          python scripts/check_release_notes.py ${{ github.event.number }}
+        else
+          python scripts/check_release_notes.py
+        fi
         
     - name: Run tests
       run: |
