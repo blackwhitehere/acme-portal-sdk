@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Release Notes Validation**: Enhanced release notes check script to handle merge conflicts and provide better error messages in CI environments (#33)
+
 ## [1.1.3alpha1] - 2025-08-29
 
 ### Fixed
