@@ -66,7 +66,7 @@ class CustomFlowFinder(FlowFinder):
             grouping=["data", "batch"],
             child_attributes={
                 # Implementation-specific attributes go here
-                "obj_name": "run_data_ingestion",  # Still needed for deployment
+                "obj_name": "run_data_ingestion",  # Needed for deployment
                 "module": "pipelines.ingestion",
                 "import_path": "pipelines.ingestion",
                 # Custom metadata for your specific needs
@@ -102,86 +102,6 @@ flow_finder = CustomFlowFinder()
 ```
 
 **Important:** The `child_attributes` field should be used to store any custom metadata or implementation-specific attributes like `obj_name`, `module`, `import_path`, etc. Platform implementations like `PrefectFlowFinder` and `AirflowFlowFinder` automatically populate these attributes when discovering flows.
-
-## API Changes and Migration
-
-For information about breaking API changes in v1.0.0 and detailed migration instructions, see the [API Migration Guide](api-migration-guide.md).
-
-The guide covers:
-- Complete breakdown of architectural changes
-- Migration instructions for different user types
-- Before/after code examples
-- Validation and testing guidance
-- Easier to integrate with different workflow platforms
-
-### Migration Guide for FlowDetails API Changes
-
-Starting with version 1.0.0, the `FlowDetails` class has been simplified to make several attributes optional that were previously required. This is a **breaking change** that affects how you work with FlowDetails objects.
-
-#### What Changed
-
-Previously required attributes that are now in `child_attributes`:
-- `obj_name` - Name of the object defining the flow (kept in PrefectFlowAttributes for deployment needs)
-- `module` - Module name where the flow is defined
-- `import_path` - Python import path to the source file
-
-**Removed attributes (no longer captured by PrefectFlowFinder):**
-- `obj_type` - Type of object defining the flow (function, method) - removed as not useful
-- `obj_parent_type` - Type of container for object defining the flow - removed as not useful  
-- `obj_parent` - Name of container for flow object - removed as not useful
-
-#### If You Use Prefect Implementation
-
-If you're using the default `PrefectFlowFinder`, **no changes are required** in your setup. The Prefect implementation automatically puts these attributes in `child_attributes` when discovering flows.
-
-To access these attributes from discovered flows:
-```python
-from acme_portal_sdk.prefect.flow_finder import PrefectFlowFinder
-
-finder = PrefectFlowFinder("path/to/flows")
-flows = finder.find_flows()
-
-for flow in flows:
-    # Access implementation-specific attributes via child_attributes
-    obj_name = flow.child_attributes.get("obj_name")  # function/method name (still available for deployment)
-    module = flow.child_attributes.get("module")      # module name
-    import_path = flow.child_attributes.get("import_path")  # import path
-```
-
-#### If You Create FlowDetails Manually
-
-If you manually create `FlowDetails` objects, you need to update your code:
-
-**Before (v0.x):**
-```python
-flow = FlowDetails(
-    name="my_flow",
-    original_name="my-flow", 
-    description="Example flow",
-    id="flow_123",
-    source_path="/path/to/file.py",
-    source_relative="file.py",
-    # These attributes were captured in previous versions but are now removed:
-    # obj_type="function", obj_parent_type="module", obj_parent="my_module"
-)
-```
-
-**After (v1.0+):**
-```python
-flow = FlowDetails(
-    name="my_flow",
-    original_name="my-flow",
-    description="Example flow", 
-    id="flow_123",
-    source_path="/path/to/file.py",
-    source_relative="file.py",
-    child_attributes={
-        "obj_name": "my_function",  # Still needed for deployment
-        "module": "my_module",
-        "import_path": "my_module.file"
-    }
-)
-```
 
 ### Custom DeploymentFinder Implementation
 

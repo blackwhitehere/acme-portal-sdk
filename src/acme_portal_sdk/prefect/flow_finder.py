@@ -78,7 +78,7 @@ class PrefectFlowFinder(FlowFinder):
 
                     # Create child_attributes with implementation-specific details
                     prefect_attrs = PrefectFlowAttributes(
-                        obj_name=self.current_function,  # Required for deployment functionality
+                        obj_name=self.current_function,
                         module=self.module,
                         import_path=""  # Will be set later in _scan_file
                     )

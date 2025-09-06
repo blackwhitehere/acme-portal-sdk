@@ -25,7 +25,7 @@ class TestFlowDetails:
             "custom_field": "custom_value", 
             "priority": 1,
             # Prefect-specific attributes that would be set by PrefectFlowFinder
-            "obj_name": "test_func",  # Still needed for deployment
+            "obj_name": "test_func",  # Needed for deployment
             "module": "test_module",
             "import_path": "test_module.source"
         }
