@@ -48,7 +48,7 @@ class TestFlowDetails:
         child_attrs = {
             "custom_field": "custom_value", 
             "priority": 1,
-            "obj_name": "test_func",  # Still needed for deployment
+            "obj_name": "test_func",  # needed for deployment
             "module": "test_module"
         }
         
@@ -111,7 +111,7 @@ class TestFlowDetails:
             "child_attributes": {
                 "custom_field": "custom_value",
                 "priority": 1,
-                "obj_name": "test_func",  # Still needed for deployment
+                "obj_name": "test_func",  # needed for deployment
                 "module": "test_module",
             }
         }
@@ -121,7 +121,7 @@ class TestFlowDetails:
         assert flow.name == "test_flow"
         assert flow.child_attributes["custom_field"] == "custom_value"
         assert flow.child_attributes["priority"] == 1
-        assert flow.child_attributes["obj_name"] == "test_func"  # Still needed for deployment
+        assert flow.child_attributes["obj_name"] == "test_func"  # needed for deployment
 
     def test_from_dict_without_child_attributes(self):
         """Test from_dict() when child_attributes is not provided."""
