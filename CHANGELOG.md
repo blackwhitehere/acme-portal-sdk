@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.3alpha1] - 2025-08-29
+
+### Fixed
+- **Import error** Fixed import error (fc30d1e)
+
+## [1.1.2alpha1] - 2025-08-29
+
+### Fixed
+- **Serializable call args** Fixed type casting for __call__ method (90becf3)
+
+## [1.1.1alpha2] - 2025-08-29
+
+### Fixed
+- **Fix unupdated call method in ABCs after method signature change** Fixed interface bug (63ade61)
+
+## [1.1.0alpha1] - 2025-08-29
+
 ### Added
 - **Selective Re-fetching Support**: Added optional parameters `flows_to_fetch` and `flow_groups` to FlowFinder.find_flows method, and `deployments_to_fetch` and `flows_to_fetch` to DeploymentFinder.get_deployments method for selective data re-fetching instead of full scans (#30)
 
