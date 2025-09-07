@@ -25,10 +25,7 @@ class TestFlowDetails:
             "custom_field": "custom_value", 
             "priority": 1,
             # Prefect-specific attributes that would be set by PrefectFlowFinder
-            "obj_type": "function",
-            "obj_name": "test_func",
-            "obj_parent_type": "module",
-            "obj_parent": "test_module",
+            "obj_name": "test_func",  # Needed for deployment
             "module": "test_module",
             "import_path": "test_module.source"
         }
@@ -51,8 +48,7 @@ class TestFlowDetails:
         child_attrs = {
             "custom_field": "custom_value", 
             "priority": 1,
-            "obj_type": "function",
-            "obj_name": "test_func",
+            "obj_name": "test_func",  # needed for deployment
             "module": "test_module"
         }
         
@@ -77,9 +73,8 @@ class TestFlowDetails:
         # Custom attributes should not be merged into the main dictionary
         assert "custom_field" not in result
         assert "priority" not in result
-        assert "obj_type" not in result
-        assert "obj_name" not in result
-        assert "module" not in result
+        assert "obj_name" not in result  # Should be in child_attributes only
+        assert "module" not in result   # Should be in child_attributes only
 
     def test_to_dict_with_empty_child_attributes(self):
         """Test that to_dict() includes child_attributes even when empty."""
@@ -116,8 +111,7 @@ class TestFlowDetails:
             "child_attributes": {
                 "custom_field": "custom_value",
                 "priority": 1,
-                "obj_type": "function",
-                "obj_name": "test_func",
+                "obj_name": "test_func",  # needed for deployment
                 "module": "test_module",
             }
         }
@@ -127,7 +121,7 @@ class TestFlowDetails:
         assert flow.name == "test_flow"
         assert flow.child_attributes["custom_field"] == "custom_value"
         assert flow.child_attributes["priority"] == 1
-        assert flow.child_attributes["obj_type"] == "function"
+        assert flow.child_attributes["obj_name"] == "test_func"  # needed for deployment
 
     def test_from_dict_without_child_attributes(self):
         """Test from_dict() when child_attributes is not provided."""

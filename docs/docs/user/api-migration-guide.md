@@ -2,6 +2,62 @@
 
 This guide covers breaking changes and migration steps for major API updates in the acme-portal-sdk.
 
+## [Unreleased]
+
+### PrefectFlowAttributes Simplification
+
+The `PrefectFlowAttributes` dataclass has been simplified by removing three attributes that were identified as not useful for core functionality:
+
+**Removed attributes:**
+- `obj_type` - Type of object defining the flow ("function" or "method")
+- `obj_parent_type` - Type of container for the flow object ("module" or "class") 
+- `obj_parent` - Name of the module or class containing the flow
+
+**Retained attributes:**
+- `obj_name` - Name of the function/method (required for deployment functionality)
+- `module` - Python module name where the flow is defined
+- `import_path` - Full Python import path to the source file
+
+#### Migration Guide
+
+**Before:**
+```python
+# PrefectFlowAttributes with 6 attributes
+attrs = PrefectFlowAttributes(
+    obj_type="function",
+    obj_name="my_function", 
+    obj_parent_type="module",
+    obj_parent="my_module",
+    module="my_module",
+    import_path="my_module.file"
+)
+```
+
+**After:**
+```python
+# PrefectFlowAttributes with 3 attributes
+attrs = PrefectFlowAttributes(
+    obj_name="my_function",  # Required for deployment
+    module="my_module",
+    import_path="my_module.file"
+)
+```
+
+**Accessing attributes via FlowDetails:**
+```python
+# Before - accessing removed attributes
+flow.child_attributes["obj_type"]        # No longer available
+flow.child_attributes["obj_parent_type"] # No longer available  
+flow.child_attributes["obj_parent"]      # No longer available
+
+# After - accessing remaining attributes
+flow.child_attributes["obj_name"]        # Still available (required for deployment)
+flow.child_attributes["module"]          # Still available
+flow.child_attributes["import_path"]     # Still available
+```
+
+This change reduces unnecessary metadata capture while preserving all essential functionality needed for flow deployment.
+
 ## FlowDetails API Changes in v1.0.0
 
 Version 1.0.0 introduces significant changes to the `FlowDetails` class structure to make it more flexible and implementation-agnostic. This section explains the architectural changes and provides comprehensive migration guidance.

@@ -23,29 +23,50 @@ from typing import List
 
 # Configuration
 CHANGELOG_PATH = Path(__file__).parent.parent / "CHANGELOG.md"
+API_MIGRATION_GUIDE_PATH = Path(__file__).parent.parent / "docs" / "docs" / "user" / "api-migration-guide.md"
+
+
+def read_file(file_path: Path) -> str:
+    """Reads a file"""
+    try:
+        return file_path.read_text(encoding='utf-8')
+    except Exception as error:
+        print(f"Error reading {file_path}: {error}", file=sys.stderr)
+        sys.exit(1)
+
+
+def write_file(file_path: Path, content: str) -> None:
+    """Writes content to a file"""
+    try:
+        file_path.write_text(content, encoding='utf-8')
+        print(f"Updated {file_path}")
+    except Exception as error:
+        print(f"Error writing {file_path}: {error}", file=sys.stderr)
+        sys.exit(1)
 
 
 def read_changelog() -> str:
     """Reads the CHANGELOG.md file"""
-    try:
-        return CHANGELOG_PATH.read_text(encoding='utf-8')
-    except Exception as error:
-        print(f"Error reading CHANGELOG.md: {error}", file=sys.stderr)
-        sys.exit(1)
+    return read_file(CHANGELOG_PATH)
 
 
 def write_changelog(content: str) -> None:
     """Writes content to CHANGELOG.md"""
-    try:
-        CHANGELOG_PATH.write_text(content, encoding='utf-8')
-        print(f"Updated {CHANGELOG_PATH}")
-    except Exception as error:
-        print(f"Error writing CHANGELOG.md: {error}", file=sys.stderr)
-        sys.exit(1)
+    write_file(CHANGELOG_PATH, content)
 
 
-def update_changelog_for_release(content: str, version: str) -> str:
-    """Updates changelog content for the new release"""
+def read_api_migration_guide() -> str:
+    """Reads the api-migration-guide.md file"""
+    return read_file(API_MIGRATION_GUIDE_PATH)
+
+
+def write_api_migration_guide(content: str) -> None:
+    """Writes content to api-migration-guide.md"""
+    write_file(API_MIGRATION_GUIDE_PATH, content)
+
+
+def update_file_for_release(content: str, version: str, file_type: str) -> str:
+    """Updates file content for the new release"""
     # Get current date in ISO format
     release_date = datetime.now().strftime("%Y-%m-%d")
     
@@ -54,7 +75,7 @@ def update_changelog_for_release(content: str, version: str) -> str:
     match = unreleased_pattern.search(content)
     
     if not match:
-        print("Error: No [Unreleased] section found in CHANGELOG.md", file=sys.stderr)
+        print(f"Error: No [Unreleased] section found in {file_type}", file=sys.stderr)
         sys.exit(1)
     
     unreleased_header = match.group(1)
@@ -62,7 +83,10 @@ def update_changelog_for_release(content: str, version: str) -> str:
     
     # If unreleased section is empty, provide a default entry
     if not unreleased_content:
-        unreleased_content = "### Changed\n- Version release"
+        if file_type == "CHANGELOG.md":
+            unreleased_content = "### Changed\n- Version release"
+        else:  # api-migration-guide.md
+            unreleased_content = "### Changes\n- Version release"
     
     # Create the new version section
     new_version_section = f"## [{version}] - {release_date}\n\n{unreleased_content}\n\n"
@@ -79,6 +103,16 @@ def update_changelog_for_release(content: str, version: str) -> str:
     return updated_content
 
 
+def update_changelog_for_release(content: str, version: str) -> str:
+    """Updates changelog content for the new release"""
+    return update_file_for_release(content, version, "CHANGELOG.md")
+
+
+def update_api_migration_guide_for_release(content: str, version: str) -> str:
+    """Updates api-migration-guide content for the new release"""
+    return update_file_for_release(content, version, "api-migration-guide.md")
+
+
 def main():
     """Main execution"""
     if len(sys.argv) != 2:
@@ -92,23 +126,44 @@ def main():
     if version.startswith('v'):
         version = version[1:]
     
-    print(f"Updating CHANGELOG.md for release {version}")
+    print(f"Updating CHANGELOG.md and api-migration-guide.md for release {version}")
     
     # Read current changelog
-    content = read_changelog()
+    changelog_content = read_changelog()
     
-    # Check if version already exists
+    # Check if version already exists in changelog
     version_pattern = re.compile(rf"## \[{re.escape(version)}\]", re.IGNORECASE)
-    if version_pattern.search(content):
+    if version_pattern.search(changelog_content):
         print(f"Warning: Version {version} already exists in CHANGELOG.md")
         print("Skipping changelog update.")
         return
     
     # Update the changelog
-    updated_content = update_changelog_for_release(content, version)
+    updated_changelog_content = update_changelog_for_release(changelog_content, version)
     
-    # Write back to file
-    write_changelog(updated_content)
+    # Write back to changelog file
+    write_changelog(updated_changelog_content)
+    
+    # Read and update api-migration-guide.md
+    if API_MIGRATION_GUIDE_PATH.exists():
+        api_guide_content = read_api_migration_guide()
+        
+        # Check if version already exists in api guide
+        if version_pattern.search(api_guide_content):
+            print(f"Warning: Version {version} already exists in api-migration-guide.md")
+            print("Skipping api-migration-guide.md update.")
+        else:
+            # Update the api migration guide
+            updated_api_guide_content = update_api_migration_guide_for_release(api_guide_content, version)
+            
+            # Write back to api guide file
+            write_api_migration_guide(updated_api_guide_content)
+            
+            print(f"Successfully updated api-migration-guide.md:")
+            print(f"- Moved [Unreleased] content to [{version}] section")
+            print(f"- Created new empty [Unreleased] section")
+    else:
+        print("Warning: api-migration-guide.md not found, skipping its update")
     
     print(f"Successfully updated CHANGELOG.md:")
     print(f"- Moved [Unreleased] content to [{version}] section")

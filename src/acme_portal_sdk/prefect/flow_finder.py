@@ -20,27 +20,18 @@ class PrefectFlowAttributes:
     information about how the flow is implemented in Python code.
     
     Attributes:
-        obj_type: Type of object defining the flow ("function" or "method")
-        obj_name: Name of the function or method that defines the flow
-        obj_parent_type: Type of container for the flow object ("module" or "class")
-        obj_parent: Name of the module or class containing the flow
+        obj_name: Name of the function or method that defines the flow (required for deployment)
         module: Python module name where the flow is defined
         import_path: Full Python import path to the source file
     """
-    obj_type: str
-    obj_name: str
-    obj_parent_type: str
-    obj_parent: str
+    obj_name: str  # Required for deployment - used in flow_deploy.py to import flow function
     module: str
     import_path: str
     
     def to_dict(self) -> Dict[str, str]:
         """Convert the dataclass to a dictionary for use in child_attributes."""
         return {
-            "obj_type": self.obj_type,
             "obj_name": self.obj_name,
-            "obj_parent_type": self.obj_parent_type,
-            "obj_parent": self.obj_parent,
             "module": self.module,
             "import_path": self.import_path,
         }
@@ -87,18 +78,10 @@ class PrefectFlowFinder(FlowFinder):
 
                     # Create child_attributes with implementation-specific details
                     prefect_attrs = PrefectFlowAttributes(
-                        obj_type="function",
                         obj_name=self.current_function,
-                        obj_parent_type="module",
-                        obj_parent=self.module,
                         module=self.module,
                         import_path=""  # Will be set later in _scan_file
                     )
-
-                    if self.current_class:
-                        prefect_attrs.obj_type = "method"
-                        prefect_attrs.obj_parent = self.current_class
-                        prefect_attrs.obj_parent_type = "class"
 
                     self.flows[flow_key] = {
                         "name": display_name,
@@ -174,6 +157,8 @@ class PrefectFlowFinder(FlowFinder):
                 # Update the import_path in the PrefectFlowAttributes and convert to dict
                 prefect_attrs = flow_data["child_attributes"]  # Get the dataclass directly
                 prefect_attrs.import_path = import_path
+                
+                # Convert PrefectFlowAttributes to dict for child_attributes
                 flow_data["child_attributes"] = prefect_attrs.to_dict()
                 
                 flow_data = FlowDetails(**flow_data)

@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **PrefectFlowAttributes Simplification**: Removed `obj_type`, `obj_parent_type`, and `obj_parent` attributes from PrefectFlowAttributes dataclass as they were not useful. The `obj_name` attribute is kept in PrefectFlowAttributes as it's required for deployment functionality. This reduces the captured metadata to essential attributes: `obj_name`, `module`, and `import_path` (#35)
+
 ### Fixed
 - **Release Notes Validation**: Enhanced release notes check script to handle merge conflicts and provide better error messages in CI environments (#33)
 
