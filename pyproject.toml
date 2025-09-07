@@ -30,6 +30,7 @@ repository = "https://github.com/blackwhitehere/acme-portal-sdk"
 [project.optional-dependencies]
 dev = [
     "pytest",               # for testing
+    "pytest-cov",           # for test coverage
     "uv",                   # for venv
     "mkdocs",               # for documentation
     "mkdocs-material",      # theme for mkdocs
