@@ -28,7 +28,11 @@ For specific platform implementations:
 
 ## Creating Custom Workflow Implementations
 
-Extend these base classes for custom implementations:
+The SDK provides base classes that you can extend to create custom implementations for your specific needs. Each base class can be configured using subclasses that implement sample functionality and return custom data.
+
+### Overview of Base Classes
+
+The SDK defines four main base classes that need to be implemented:
 
 * [`FlowFinder`](../developer/api-reference.md#acme_portal_sdk.flow_finder.FlowFinder) - Discovers flows in your codebase
 * [`DeploymentFinder`](../developer/api-reference.md#acme_portal_sdk.deployment_finder.DeploymentFinder) - Finds existing deployments
@@ -36,6 +40,8 @@ Extend these base classes for custom implementations:
 * [`PromoteWorkflow`](../developer/api-reference.md#acme_portal_sdk.deployment_promote.PromoteWorkflow) - Manages deployment promotion between environments
 
 ### Custom FlowFinder Implementation
+
+Create a custom `FlowFinder` subclass to discover flows in your codebase:
 
 ```python
 # .acme-portal-sdk/flow_finder.py
@@ -46,8 +52,10 @@ class CustomFlowFinder(FlowFinder):
     """Custom flow finder that discovers flows with custom metadata."""
     
     def find_flows(self) -> List[FlowDetails]:
+        # Sample implementation that returns flows with custom metadata
         flows = []
         
+        # Example: discover critical batch processing flows
         flows.append(FlowDetails(
             name="data_ingestion",
             original_name="data-ingestion",
@@ -57,17 +65,17 @@ class CustomFlowFinder(FlowFinder):
             source_relative="pipelines/ingestion.py",
             grouping=["data", "batch"],
             child_attributes={
-                "obj_type": "function",
-                "obj_name": "run_data_ingestion",
-                "obj_parent_type": "module",
-                "obj_parent": "pipelines.ingestion",
+                # Implementation-specific attributes go here
+                "obj_name": "run_data_ingestion",  # Needed for deployment
                 "module": "pipelines.ingestion",
                 "import_path": "pipelines.ingestion",
-                "priority": 10,
+                # Custom metadata for your specific needs
+                "priority": 10,  # High priority
                 "category": "critical",
             }
         ))
         
+        # Example: discover standard processing flows
         flows.append(FlowDetails(
             name="data_transformation",
             original_name="data-transformation",
@@ -77,13 +85,12 @@ class CustomFlowFinder(FlowFinder):
             source_relative="pipelines/transform.py",
             grouping=["data", "processing"],
             child_attributes={
-                "obj_type": "function",
-                "obj_name": "transform_data",
-                "obj_parent_type": "module",
-                "obj_parent": "pipelines.transform",
+                # Implementation-specific attributes go here
+                "obj_name": "transform_data",  # Still needed for deployment
                 "module": "pipelines.transform", 
                 "import_path": "pipelines.transform",
-                "priority": 5,
+                # Custom metadata for your specific needs
+                "priority": 5,  # Medium priority
                 "category": "standard",
             }
         ))
@@ -94,61 +101,11 @@ class CustomFlowFinder(FlowFinder):
 flow_finder = CustomFlowFinder()
 ```
 
-Use `child_attributes` for implementation-specific metadata.
-
-## API Changes and Migration
-
-See the [API Migration Guide](api-migration-guide.md) for v1.0.0 changes.
-
-### Migration Guide for FlowDetails API Changes
-
-Version 1.0.0 moved these attributes to `child_attributes`:
-- `obj_type`, `obj_name`, `obj_parent_type`, `obj_parent`, `module`, `import_path`
-
-#### If You Use Prefect Implementation
-
-No changes required. Access moved attributes via `child_attributes`:
-
-```python
-for flow in flows:
-    obj_type = flow.child_attributes.get("obj_type")
-    obj_name = flow.child_attributes.get("obj_name")
-    module = flow.child_attributes.get("module")
-```
-
-#### If You Create FlowDetails Manually
-
-Move implementation-specific attributes to `child_attributes`:
-
-**Before:**
-```python
-flow = FlowDetails(
-    name="my_flow",
-    obj_type="function",
-    obj_name="my_function",
-    # other attributes...
-)
-```
-
-**After:**
-```python
-flow = FlowDetails(
-    name="my_flow",
-    id="flow_123",
-    source_path="/path/to/file.py",
-    source_relative="file.py",
-    child_attributes={
-        "obj_type": "function",
-        "obj_name": "my_function",
-        "obj_parent_type": "module",
-        "obj_parent": "my_module",
-        "module": "my_module",
-        "import_path": "my_module.file"
-    }
-)
-```
+**Important:** The `child_attributes` field should be used to store any custom metadata or implementation-specific attributes like `obj_name`, `module`, `import_path`, etc. Platform implementations like `PrefectFlowFinder` and `AirflowFlowFinder` automatically populate these attributes when discovering flows.
 
 ### Custom DeploymentFinder Implementation
+
+Create a custom `DeploymentFinder` subclass to discover deployments in your environment:
 
 ```python
 # .acme-portal-sdk/deployment_finder.py
@@ -156,9 +113,13 @@ from typing import List
 from acme_portal_sdk.deployment_finder import DeploymentFinder, DeploymentDetails
 
 class CustomDeploymentFinder(DeploymentFinder):
+    """Custom deployment finder that discovers deployments with resource and region metadata."""
+    
     def get_deployments(self, project_name: str, branch_name: str, env: str) -> List[DeploymentDetails]:
+        # Sample implementation that returns deployments with custom metadata
         deployments = []
         
+        # Example: production deployment with high resources
         deployments.append(DeploymentDetails(
             name=f"{project_name}--{branch_name}--data_ingestion--{env}",
             project_name=project_name,
@@ -199,8 +160,9 @@ class CustomDeploymentFinder(DeploymentFinder):
                 flow_id="flow_002",
                 url="https://deployment-system.com/deployments/deploy_002",
                 child_attributes={
-                    "region": "us-east-1",
-                    "cpu_limit": "1000m",
+                    # Custom metadata for your specific needs
+                    "region": "us-east-1",  # Standard region for dev
+                    "cpu_limit": "1000m",   # Lower CPU limit for dev
                     "memory_limit": "2Gi",
                     "health_check_enabled": False,
                 }
@@ -214,6 +176,8 @@ deployment_finder = CustomDeploymentFinder()
 
 ### Custom DeployWorkflow Implementation
 
+Both [`DeployWorkflow`](../developer/api-reference.md#acme_portal_sdk.flow_deploy.DeployWorkflow) and [`PromoteWorkflow`](../developer/api-reference.md#acme_portal_sdk.deployment_promote.PromoteWorkflow) use flexible signatures (`*args, **kwargs`) allowing custom implementations to accept additional parameters beyond the standard ones.
+
 ```python
 # .acme-portal-sdk/flow_deploy.py
 from typing import Optional, Dict, Any, List
@@ -226,14 +190,17 @@ class CustomDeployWorkflow(DeployWorkflow):
         self.notification_webhook = notification_webhook
     
     def run(self, *args, **kwargs) -> Optional[str]:
+        # Extract standard parameters with flexible argument handling
         flows = kwargs.get('flows_to_deploy', args[0] if args else [])
         ref = kwargs.get('ref', args[1] if len(args) > 1 else 'main')
         
+        # Accept custom parameters
         environment = kwargs.get('environment', 'dev')
         config = kwargs.get('deployment_config', {})
         dry_run = kwargs.get('dry_run', False)
         notification_channels = kwargs.get('notification_channels', [])
         
+        # Sample deployment logic with custom functionality
         deployment_id = f"deploy_{hash(f'{flows}_{ref}_{environment}')}"
         
         print(f"Starting deployment {deployment_id}")
@@ -249,10 +216,12 @@ class CustomDeployWorkflow(DeployWorkflow):
         # Simulate environment-specific deployment steps
         if environment == "prod":
             print("  Performing production deployment with safety checks...")
+            # Add production-specific logic like approval workflows
             self._validate_production_deployment(flows, config)
         else:
             print(f"  Performing {environment} deployment...")
         
+        # Send notifications if configured
         if notification_channels:
             self._send_notifications(notification_channels, deployment_id, flows, environment)
         
