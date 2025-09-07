@@ -78,6 +78,15 @@ cd docs
 mkdocs serve
 ```
 
+#### Documentation Style
+
+Write documentation that is very direct and verbose. Detailed when needed but not explain too much extra context:
+- Use clear, simple language
+- Be comprehensive and detailed when information is needed
+- Focus on what users need to do, not why or how it works internally
+- Avoid redundant information and unnecessary context
+- Keep code comments minimal - only explain complex logic, not obvious actions
+
 ## Contributing Guidelines
 
 ### Pull Request Process
