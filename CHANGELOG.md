@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- **Documentation Language**: Trimmed verbose language from documentation for clearer, more direct communication (#36)
+
 ## [1.2.0alpha1] - 2025-09-07
 
 ### Changed
