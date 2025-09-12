@@ -19,32 +19,6 @@ Write documentation that is very direct and verbose. Detailed when needed but no
 - Avoid redundant information and unnecessary context
 - Keep code comments minimal - only explain complex logic, not obvious actions
 
-## Release Notes Requirements
+When adding comments to code only explain current functionality and not how the code has recently changed.
 
-**Every pull request must include a release notes entry in CHANGELOG.md**
-
-When making changes:
-1. **Always add an entry to the `[Unreleased]` section** in CHANGELOG.md
-2. **Use the appropriate category**:
-   - `### Added` - for new features
-   - `### Changed` - for changes in existing functionality  
-   - `### Fixed` - for bug fixes
-   - `### Security` - for security-related changes
-   - `### Deprecated` - for soon-to-be removed features
-   - `### Removed` - for removed features
-
-3. **Format entries correctly**:
-   ```markdown
-   - **Feature/Fix Name**: Brief description of the change (#PR_NUMBER)
-   ```
-
-4. **Include PR reference**: Always add the PR number in parentheses for linking
-5. **Make it user-focused**: Describe the change from the user's perspective, not implementation details
-
-**Example entry:**
-```markdown
-### Added
-- **Deploy Progress Notifications**: Added real-time progress updates during flow deployment operations (#42)
-```
-
-See docs/docs/developer/contributing.md for complete release notes guidelines.
+Read `CONTRIBUTING.md` file in the root of the repository for complete contributing guidelines. Follow them closely

@@ -6,9 +6,9 @@ Thank you for your interest in contributing to acme-portal-sdk! This guide will 
 
 ### Prerequisites
 
-- Python 3.10+
+- See pyproject.yml for current minimal supported version of Python. The `.python-version` file used by `uv` contains version of python used for development.
 - Git
-- GitHub CLI (`gh`) - for workflow testing
+- GitHub CLI (`gh`) - for workflow testing of acme_portal_sdk.github subpackage
 
 ### Environment Setup
 
@@ -66,7 +66,7 @@ pytest
 # Run tests with coverage
 pytest --cov=acme_portal_sdk
 
-# Check release notes format
+# Check release notes are formatted correctly
 python scripts/check_release_notes.py
 ```
 
@@ -75,6 +75,10 @@ python scripts/check_release_notes.py
 Build documentation locally:
 ```bash
 cd docs
+mkdocs build
+```
+To view it locally
+```bash
 mkdocs serve
 ```
 
@@ -97,10 +101,10 @@ Write documentation that is very direct and verbose. Detailed when needed but no
    ```
 
 2. **Make your changes**:
-   - Write tests for new functionality
-   - Update documentation as needed
+   - Write tests for new functionality, mark sections that do not need to be unit tested with `# pragma: no cover` annotation
+   - Update documentation `docs/docs/user/api-migration-guide.md` if making API breaking changes
+   - Make concise description of added/changed functionality in `user` or `developer` section of the docs depending on the nature of the change
    - Ensure all checks pass
-   - **Add release notes entry** to CHANGELOG.md (required)
 
 3. **Add Release Notes Entry** (Required):
    - Open `CHANGELOG.md`
