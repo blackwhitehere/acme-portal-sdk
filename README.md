@@ -74,12 +74,18 @@ flow_finder = MyCustomFlowFinder()
 #### `.acme_portal_sdk/deployment_finder.py`
 ```python
 from acme_portal_sdk.deployment_finder import DeploymentFinder, DeploymentDetails
-from typing import List
+from acme_portal_sdk.flow_finder import FlowDetails
+from typing import List, Optional
 
 class MyCustomDeploymentFinder(DeploymentFinder):
     """Custom implementation to find existing deployments."""
     
-    def get_deployments(self) -> List[DeploymentDetails]:
+    def get_deployments(
+        self,
+        *,
+        deployments_to_fetch: Optional[List[DeploymentDetails]] = None,
+        flows_to_fetch: Optional[List[FlowDetails]] = None,
+    ) -> List[DeploymentDetails]:
         """Return sample deployments."""
         return [
             DeploymentDetails(
