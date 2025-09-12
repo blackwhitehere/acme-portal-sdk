@@ -2,7 +2,7 @@
 
 Breaking changes and migration steps for major API updates.
 
-## [Unreleased]
+## v1.2.0
 
 ### PrefectFlowAttributes Simplification
 
