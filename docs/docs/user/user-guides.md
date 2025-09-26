@@ -14,6 +14,7 @@ The VSCode extension will use these classes to handle UI operations.
 ## Using platform-specific implementations
 
 * **Prefect**: See [Prefect Support](prefect.md)
+  * **V2 Deployment Paradigm**: See [Prefect V2 Deployment](prefect-v2-deployment.md) for script-based deployments
 * **Airflow**: See [Airflow Support](airflow.md)
 * **GitHub Workflows**: See [GitHub Workflows Guide](github-workflows.md)
 
