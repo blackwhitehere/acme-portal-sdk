@@ -10,6 +10,7 @@ from acme_portal_sdk.prefect.flow_deploy import (
     PrefectFlowDeployer,
 )
 from acme_portal_sdk.prefect.deployment_promote import PrefectDeploymentPromote
+from acme_portal_sdk.prefect.deployment_v2 import PrefectDeploymentV2Manager
 
 logger = logging.getLogger(__name__)
 
@@ -120,6 +121,65 @@ def parse_args():
         help="Comma separated list of flow config names to deploy, or 'all'",
     )
 
+    # V2 deployment paradigm commands
+    # Generate deployment scripts command
+    generate_parser = subparsers.add_parser("generate-scripts", help="Generate v2 deployment scripts")
+    add_main_arguments(generate_parser)
+    generate_parser.add_argument(
+        "-project-name", type=lambda x: str(x).replace("_", "-"), required=True, help="Name of the project"
+    )
+    generate_parser.add_argument(
+        "-branch-name", type=lambda x: str(x).replace("_", "-"), required=True, help="Name of the branch"
+    )
+    generate_parser.add_argument("-commit-hash", type=str, required=True, help="Git commit hash")
+    generate_parser.add_argument("-image-uri", type=str, required=True, help="Image URI")
+    generate_parser.add_argument("-package-version", type=str, required=True, help="Package version")
+    generate_parser.add_argument(
+        "-static-flow-config-path", type=str, required=True, help="Path to static flow deployment configuration file"
+    )
+    generate_parser.add_argument(
+        "--flows-to-deploy", type=str, default="all", help="Comma separated list of flow config names to deploy, or 'all'"
+    )
+    generate_parser.add_argument(
+        "--scripts-root-dir", type=str, default="./deployment_scripts", help="Root directory for deployment scripts"
+    )
+    generate_parser.add_argument(
+        "--overwrite", action="store_true", help="Overwrite existing scripts instead of preserving custom sections"
+    )
+
+    # Deploy from scripts command  
+    deploy_scripts_parser = subparsers.add_parser("deploy-scripts", help="Deploy flows using v2 deployment scripts")
+    deploy_scripts_parser.add_argument(
+        "--scripts-root-dir", type=str, default="./deployment_scripts", help="Root directory for deployment scripts"
+    )
+    deploy_scripts_parser.add_argument("--project-name", type=str, help="Filter by project name")
+    deploy_scripts_parser.add_argument("--env", type=str, help="Filter by environment")
+    deploy_scripts_parser.add_argument(
+        "--flows-to-deploy", type=str, help="Comma separated list of flow names to deploy"
+    )
+
+    # List deployment scripts command
+    list_scripts_parser = subparsers.add_parser("list-scripts", help="List v2 deployment scripts")
+    list_scripts_parser.add_argument(
+        "--scripts-root-dir", type=str, default="./deployment_scripts", help="Root directory for deployment scripts"
+    )
+    list_scripts_parser.add_argument("--project-name", type=str, help="Filter by project name")
+    list_scripts_parser.add_argument("--env", type=str, help="Filter by environment")
+    list_scripts_parser.add_argument(
+        "--flows-to-deploy", type=str, help="Comma separated list of flow names to filter"
+    )
+
+    # Validate deployment scripts command
+    validate_scripts_parser = subparsers.add_parser("validate-scripts", help="Validate v2 deployment scripts")
+    validate_scripts_parser.add_argument(
+        "--scripts-root-dir", type=str, default="./deployment_scripts", help="Root directory for deployment scripts"
+    )
+    validate_scripts_parser.add_argument("--project-name", type=str, help="Filter by project name")
+    validate_scripts_parser.add_argument("--env", type=str, help="Filter by environment")
+    validate_scripts_parser.add_argument(
+        "--flows-to-deploy", type=str, help="Comma separated list of flow names to filter"
+    )
+
     return parser.parse_args()
 
 
@@ -215,11 +275,124 @@ def promote(args):
     )
 
 
+def generate_scripts(args):
+    """Generate v2 deployment scripts."""
+    # Load environment variables
+    env_vars = load_saved_parameters(args.app_name, args.env, args.ver_number)
+
+    # Get the flow_finder instance
+    flow_finder = import_flow_finder()
+
+    # Initialize deploy info prep
+    deploy_info_prep = PrefectDeployInfoPrep(
+        static_flow_deploy_config=args.static_flow_config_path,
+        default_work_pool=DEFAULT_WORK_POOL,
+        prefect_flow_finder=flow_finder,
+    )
+
+    # Initialize v2 deployment manager
+    v2_manager = PrefectDeploymentV2Manager(Path(args.scripts_root_dir))
+
+    # Determine which flows to deploy
+    flows_to_deploy = _get_flows_to_deploy(args.flows_to_deploy, flow_finder)
+
+    # Generate deployment scripts
+    scripts = v2_manager.sync_deployment_scripts(
+        deploy_info_prep=deploy_info_prep,
+        project_name=args.project_name,
+        branch_name=args.branch_name,
+        commit_hash=args.commit_hash,
+        image_uri=args.image_uri,
+        package_version=args.package_version,
+        env=args.env,
+        flows_to_deploy=flows_to_deploy,
+        env_vars=env_vars,
+        overwrite_existing=args.overwrite
+    )
+
+    print(f"Generated {len(scripts)} deployment scripts in {args.scripts_root_dir}")
+    for script in scripts:
+        print(f"  - {script}")
+
+
+def deploy_scripts(args):
+    """Deploy flows using v2 deployment scripts."""
+    # Initialize v2 deployment manager
+    v2_manager = PrefectDeploymentV2Manager(Path(args.scripts_root_dir))
+
+    # Parse flows to deploy if provided
+    flows_to_deploy = None
+    if args.flows_to_deploy:
+        flows_to_deploy = args.flows_to_deploy.split(",")
+
+    # Deploy from scripts
+    successful_scripts = v2_manager.deploy_from_scripts(
+        project_name=args.project_name,
+        env=args.env,
+        flow_names=flows_to_deploy
+    )
+
+    print(f"Successfully deployed {len(successful_scripts)} flows from scripts")
+
+
+def list_scripts(args):
+    """List v2 deployment scripts."""
+    # Initialize v2 deployment manager
+    v2_manager = PrefectDeploymentV2Manager(Path(args.scripts_root_dir))
+
+    # Parse flows to filter if provided
+    flows_to_filter = None
+    if args.flows_to_deploy:
+        flows_to_filter = args.flows_to_deploy.split(",")
+
+    # List scripts
+    scripts = v2_manager.list_deployment_scripts(
+        project_name=args.project_name,
+        env=args.env,
+        flow_names=flows_to_filter
+    )
+
+    if scripts:
+        print(f"Found {len(scripts)} deployment scripts:")
+        for script in scripts:
+            print(f"  - {script}")
+    else:
+        print("No deployment scripts found matching the criteria")
+
+
+def validate_scripts(args):
+    """Validate v2 deployment scripts."""
+    # Initialize v2 deployment manager
+    v2_manager = PrefectDeploymentV2Manager(Path(args.scripts_root_dir))
+
+    # Parse flows to filter if provided
+    flows_to_filter = None
+    if args.flows_to_deploy:
+        flows_to_filter = args.flows_to_deploy.split(",")
+
+    # Validate scripts
+    valid_scripts = v2_manager.validate_deployment_scripts(
+        project_name=args.project_name,
+        env=args.env,
+        flow_names=flows_to_filter
+    )
+
+    print(f"Validated {len(valid_scripts)} deployment scripts successfully")
+
+
 def main_logic(args):
     if args.command == "deploy":
         deploy(args)
     elif args.command == "promote":
         promote(args)
+    elif args.command == "generate-scripts":
+        generate_scripts(args)
+    elif args.command == "deploy-scripts":
+        deploy_scripts(args)
+    elif args.command == "list-scripts":
+        list_scripts(args)
+    elif args.command == "validate-scripts":
+        validate_scripts(args)
     else:
         raise ValueError(f"Invalid command: {args.command}")
 
